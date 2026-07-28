@@ -1,0 +1,38 @@
+BasedOnStyle: LLVM
+Language: Cpp
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AccessModifierOffset: -2
+ContinuationIndentWidth: 8
+ReferenceAlignment: Right
+PointerAlignment: Right
+QualifierAlignment: Left
+DerivePointerAlignment: false
+BreakBeforeBraces: Attach
+AlignAfterOpenBracket: DontAlign
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+  AlignCompound: true
+  PadOperators: true
+AlignArrayOfStructures: Left
+AlignTrailingComments: true
+ColumnLimit: 100
+PenaltyReturnTypeOnItsOwnLine: 100
+PenaltyExcessCharacter: 100
+PenaltyBreakComment: 200
+MaxEmptyLinesToKeep: 2
+KeepEmptyLinesAtTheStartOfBlocks: false
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: false
+SpacesInParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesBeforeTrailingComments: 2
+SortIncludes: true
+IncludeBlocks: Preserve
+AlwaysBreakTemplateDeclarations: Yes
+NamespaceIndentation: None
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
