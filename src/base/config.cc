@@ -3,14 +3,11 @@ module;
 #include <chrono>
 #include <expected>
 // #include <filesystem>
-#include <source_location>
+// #include <source_location>
 
 module launcher.base;
 
 namespace launcher {
-
-Error::Error(ErrorCode code, StringView message)
-    : code_(code), message_(message), location_(std::source_location::current()) {}
 
 Result<void> Config::Validate() const {
     if (this->path.cache_directory.empty() || this->path.log_directory.empty() ||
