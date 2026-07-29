@@ -9,45 +9,13 @@ module;
 
 #include <algorithm>
 #include <chrono>
-#include <expected>
-#include <source_location>
 #include <thread>
 
 export module launcher.base;
 export import :types;
+export import :error;
 
 
-namespace launcher {
-export enum class ErrorCode {
-    Ok,
-    InvalidArgument,
-    InvalidState,
-    Unsupported,
-    IOError,
-    NetworkError,
-    DownloadFailed,
-    Timeout,
-    NotFound,
-    AlreadyExists,
-    PermissionDenied,
-    ParseError,
-    InternalError
-};
-export class Error {
-  public:
-    Error(ErrorCode code, StringView message);
-
-    /*std::source_location location = std::source_location::current()*/
-  private:
-    ErrorCode code_;
-    String message_;
-    // String module_;
-    std::source_location location_;
-};
-
-export template <typename T>
-using Result = std::expected<T, Error>;
-}  // namespace launcher
 //
 namespace launcher {
 export enum class LogLevel {
@@ -129,8 +97,8 @@ export struct NetworkConfig {
 
 export struct RuntimeConfig {
     u32 worker_threads = std::max(4u, std::thread::hardware_concurrency());  // 下载线程数
-    bool debug_mode;           // Logger: Debug & Trace
-    bool enable_cache = true;  // 是否缓存下载
+    bool debug_mode    = false;  // Logger: Debug & Trace
+    bool enable_cache  = true;   // 是否缓存下载
 };
 
 export class Config {
