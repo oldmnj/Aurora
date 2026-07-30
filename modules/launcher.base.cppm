@@ -13,3 +13,5 @@ export import :error;
 export import :platform;
 export import :build;
 export import :logger;
+export import :config;
+
