@@ -30,8 +30,8 @@ add_includedirs("include/cpp", "include/c", {public=true})
 
 target("launcher_core")
     set_kind("shared")
-    set_basename("LauncherCore")
-    
+    set_basename("AuroraCore")
+
     add_files("src/base/*.cc")
     add_files("src/io/*.cc")
     add_files("src/assets/*.cc")
