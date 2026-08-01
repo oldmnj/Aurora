@@ -25,5 +25,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/xrepo.cmake)
 include(cmake/DepPackage.cmake)
 
 add_subdirectory(src)
-add_subdirectory(tests)
 add_subdirectory(modules)
+
+
+add_subdirectory(tests)

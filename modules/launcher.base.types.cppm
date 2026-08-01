@@ -71,4 +71,7 @@ using ConstSpan = std::span<const T>;
 
 template <typename T>
 using Optional = std::optional<T>;
+
+template <typename T>
+using Vector = std::vector<T>;
 }  // namespace launcher
