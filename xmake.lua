@@ -1,4 +1,4 @@
-set_project("OlLauncherCore")
+set_project("AuroraLuncherCore")
 set_version("1.0.0")
 set_languages("cxx23")
 
@@ -28,7 +28,7 @@ includes("tests", "examples")
 
 add_includedirs("include/cpp", "include/c", {public=true})
 
-target("launcher_core")
+target("AuroraCore")
     set_kind("shared")
     set_basename("AuroraCore")
 
@@ -41,7 +41,8 @@ target("launcher_core")
     add_files("src/loader/*.cc")
     add_files("src/process/*.cc")
     add_files("src/version/*.cc")
-    
+
+
     add_files("modules/*.cppm")
     
     if is_plat("windows") then

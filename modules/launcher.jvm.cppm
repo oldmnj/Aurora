@@ -5,3 +5,4 @@
  * This is the core kernel module of the launcher.
  * For license details, see the LICENSE file in the root directory.
  */
+export module launcher.jvm;
