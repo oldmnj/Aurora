@@ -1,5 +1,0 @@
-target("examples_cli")
-    set_kind("binary")
-    add_files("cli/*.cc")
-    -- add_deps("launcher_core")
-    add_packages("fmt")

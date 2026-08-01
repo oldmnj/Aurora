@@ -18,20 +18,22 @@ Result<void> Config::Validate() const {
             !std::filesystem::exists(this->path.log_directory) ||
             !std::filesystem::exists(this->path.temp_directory)
     */) {
-        return std::unexpected<Error>(Error{ErrorCode::InvalidArgument, "路径参数无效"});
+        return std::unexpected<Error>(
+                Error{ErrorCategory::Config, ErrorCode::InvalidArgument, "路径参数无效"});
     } else if (this->network.timeout <= std::chrono::seconds{0}) {
         return std::unexpected<Error>{
-                Error{ErrorCode::InvalidArgument, "超时参数不是正数"}
+                Error{ErrorCategory::Config, ErrorCode::InvalidArgument, "超时参数不是正数"}
         };
     } else if (this->runtime.worker_threads <= 0) {
         return std::unexpected<Error>{
-                Error{ErrorCode::InvalidArgument, "runtime: 线程数不能为非正整数"}
+                Error{ErrorCategory::Config, ErrorCode::InvalidArgument,
+                      "runtime: 线程数不能为非正整数"}
         };
     } else {
         return {};
     }
     return std::unexpected<Error>{
-            Error{ErrorCode::InternalError, "未知错误"}
+            Error{ErrorCategory::Config, ErrorCode::InternalError, "未知错误"}
     };
 }
 
