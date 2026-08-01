@@ -34,7 +34,7 @@ export class Logger {
 
     static void Shutdown();
 
-    static void SetLevel(LogLevel Level);
+    static void SetLevel(LogLevel Level) noexcept;
 
     static LogLevel Level() noexcept;
 
@@ -58,7 +58,7 @@ export class Logger {
     static void Critical(fmt::format_string<Args...> fmt, Args &&...args);
 };
 namespace details {
-spdlog::logger &GetLogger();
+spdlog::logger *GetLogger();
 spdlog::level::level_enum ToSpdlogLevel(LogLevel);
 }  // namespace details
 
@@ -67,26 +67,32 @@ spdlog::level::level_enum ToSpdlogLevel(LogLevel);
 namespace launcher {
 template <typename... Args>
 void Logger::Trace(fmt::format_string<Args...> fmt, Args &&...args) {
-    details::GetLogger().trace(fmt, std::forward<Args>(args)...);
+    if (auto logger = details::GetLogger())
+        logger->trace(fmt, std::forward<Args>(args)...);
 }
 template <typename... Args>
 void Logger::Debug(fmt::format_string<Args...> fmt, Args &&...args) {
-    details::GetLogger().debug(fmt, std::forward<Args>(args)...);
+    if (auto logger = details::GetLogger())
+        logger->debug(fmt, std::forward<Args>(args)...);
 }
 template <typename... Args>
 void Logger::Info(fmt::format_string<Args...> fmt, Args &&...args) {
-    details::GetLogger().info(fmt, std::forward<Args>(args)...);
+    if (auto logger = details::GetLogger())
+        logger->info(fmt, std::forward<Args>(args)...);
 }
 template <typename... Args>
 void Logger::Warn(fmt::format_string<Args...> fmt, Args &&...args) {
-    details::GetLogger().warn(fmt, std::forward<Args>(args)...);
+    if (auto logger = details::GetLogger())
+        logger->warn(fmt, std::forward<Args>(args)...);
 }
 template <typename... Args>
 void Logger::Error(fmt::format_string<Args...> fmt, Args &&...args) {
-    details::GetLogger().error(fmt, std::forward<Args>(args)...);
+    if (auto logger = details::GetLogger())
+        logger->error(fmt, std::forward<Args>(args)...);
 }
 template <typename... Args>
 void Logger::Critical(fmt::format_string<Args...> fmt, Args &&...args) {
-    details::GetLogger().critical(fmt, std::forward<Args>(args)...);
+    if (auto logger = details::GetLogger())
+        logger->critical(fmt, std::forward<Args>(args)...);
 }
 }  // namespace launcher

@@ -1,1 +1,1 @@
-# Aurora MC Launcker Core
+# Aurora Launcker Core

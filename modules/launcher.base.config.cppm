@@ -33,6 +33,8 @@ export struct LoggerConfig {
     bool flush_immediately = false;  // 每条日志立即Flush
     bool console_output    = true;   // 是否终端打印
     bool file_output       = true;   // 是否输出文件
+    Path file_name         = "launcher.log";
+    bool async             = false;
 };
 
 export struct NetworkConfig {
