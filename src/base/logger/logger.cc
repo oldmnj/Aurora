@@ -74,7 +74,8 @@ Result<void> Logger::Initialize(const LoggerConfig &config) {
 
     if (sinks.empty()) {
         return std::unexpected<launcher::Error>{
-                launcher::Error{ErrorCode::InvalidArgument, "Logger没有任何输出目标"}
+                launcher::Error{ErrorCategory::Runtime, ErrorCode::InvalidArgument,
+                                "Logger没有任何输出目标"}
         };
     }
 

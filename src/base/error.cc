@@ -5,8 +5,9 @@ module;
 module launcher.base;
 
 namespace launcher {
-Error::Error(ErrorCode code, StringView message, std::source_location location)
-    : code_(code), message_(message), location_(location) {}
+Error::Error(
+        ErrorCategory category, ErrorCode code, StringView message, std::source_location location)
+    : code_(code), category_(category), message_(message), location_(location) {}
 
 [[nodiscard]] ErrorCode Error::Code() const noexcept { return this->code_; }
 
@@ -14,6 +15,11 @@ Error::Error(ErrorCode code, StringView message, std::source_location location)
 
 [[nodiscard]] const std::source_location &Error::Location() const noexcept {
     return this->location_;
+}
+
+[[nodiscard]]
+ErrorCategory Error::Category() const noexcept {
+    return this->category_;
 }
 
 [[nodiscard]]

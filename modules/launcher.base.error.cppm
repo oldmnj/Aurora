@@ -38,9 +38,21 @@ export enum class ErrorCode {
     Unknown
 };
 
+export enum class ErrorCategory {  // 错误类型
+    None,
+
+    System,
+    IO,
+    Network,
+    Security,
+    Config,
+    Runtime,
+    Minecraft
+};
+
 export class Error {
   public:
-    Error(ErrorCode code, StringView message,
+    Error(ErrorCategory category, ErrorCode code, StringView message,
             std::source_location location = std::source_location::current());
     [[nodiscard]]
     ErrorCode Code() const noexcept;
@@ -52,8 +64,12 @@ export class Error {
     [[nodiscard]]
     constexpr StringView ToString(ErrorCode) noexcept;
 
+    [[nodiscard]]
+    ErrorCategory Category() const noexcept;
+
   private:
     ErrorCode code_;
+    ErrorCategory category_;
     String message_;
     std::source_location location_;
 };
