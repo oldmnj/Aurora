@@ -55,10 +55,68 @@ commit信息要求使用Conventional Commits风格，
 此外，如果可以，每次commit尽量使用gnupg签名并提交
 
 
-### 分支
+### 分支管理
 
-主分支为 'main' 分支，开发人员不得直接push到main分支，main分支提交只能通过提Pull Request来接受审查并合并，希望commit能呈线性，如果合并的该分支commit状态不佳建议使用 压缩合并[^1] commit状态良好使用 变基合并[^2]
-此外，个人开发所负责的分支，命名应为 username/dev 或 username.dev
+#### 主分支
+
+- 主分支为 `main`，始终保持可构建、可运行状态
+- 禁止直接 push 到 `main`，所有变更必须通过 Pull Request 合并
+- `main` 分支受保护，需通过 CI 检查且至少 1 人 review 通过后方可合并
+
+#### 分支命名规范
+
+| 类型 | 格式 | 示例 |
+| :--- | :--- | :--- |
+| 个人开发分支 | `username/dev` 或 `username.dev` | `oldmnj/dev` |
+| 功能分支 | `username/feat/<scope>-<action>` | `oldmnj/feat/logger-impl` |
+| 修复分支 | `username/fix/<scope>-<description>` | `oldmnj/fix/config-crash` |
+| 重构分支 | `username/refactor/<scope>` | `oldmnj/refactor/error-handling` |
+| 文档分支 | `username/docs/<description>` | `oldmnj/docs/api-reference` |
+| 性能优化 | `username/perf/<scope>` | `oldmnj/perf/asset-loading` |
+| 测试分支 | `username/test/<scope>` | `oldmnj/test/auth-coverage` |
+| 依赖更新 | `username/chore/<description>` | `oldmnj/chore/bump-fmt-11` |
+| 紧急修复 | `hotfix/<description>` | `hotfix/critical-memory-leak` |
+
+> 注意：`username` 使用 GitHub 用户名，全小写，无特殊字符。`scope` 对应模块名（如 `logger`、`config`、`auth` 等）。
+
+#### 合并策略
+
+| 场景 | 策略 | 说明 |
+| :--- | :--- | :--- |
+| 分支 commit 历史混乱、包含无意义提交（如 `Changes: ...`） | Squash and merge | 压缩为单个 commit，保持 `main` 历史整洁 |
+| 分支 commit 历史清晰、每个 commit 都有独立意义 | Rebase and merge | 保留线性历史，不生成合并节点 |
+| 需要保留分支合并记录（如发布版本） | Create a merge commit | 仅在特殊情况下使用，需团队讨论 |
+
+#### 开发流程
+
+```bash
+# 1. 确保 main 最新
+git checkout main
+git pull
+
+# 2. 创建个人开发分支
+git switch -c username/dev
+
+# 3. 从个人分支切功能分支（可选，推荐功能独立时这样做）
+git switch -c username/feat/xxx
+
+# 4. 开发并提交
+git add .
+git commit -m "feat(scope): description"
+
+# 5. 推送到远程
+git push -u origin username/feat/xxx
+
+# 6. GitHub 创建 Pull Request，等待 review
+# 7. 合并后删除远程分支
+git push origin --delete username/feat/xxx
+git branch -d username/feat/xxx
+```
+
+#### 分支清理
+
+- 已合并的分支应在合并后 立即删除（本地 + 远程）
+- 长期未更新的分支（超过 2 周）视为过期，需确认是否保留
 
 
 ## 代码规范

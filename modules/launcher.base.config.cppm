@@ -26,7 +26,7 @@ export struct PathConfig {
     Path temp_directory    = "./tmp";      // 下载临时目录，程序退出后须删除
     Path log_directory     = "./log";      // 日志输出目录
     Path runtime_directory = "./runtime";  // SDK 工作目录，任何相对路径都要基于此处而言
-};
+};  // 这里还没写好，其实这些目录基于runtime_dir的相对路径
 
 export struct LoggerConfig {
     LogLevel level         = LogLevel::Info;
@@ -34,7 +34,7 @@ export struct LoggerConfig {
     bool console_output    = true;   // 是否终端打印
     bool file_output       = true;   // 是否输出文件
     Path file_name         = "launcher.log";
-    bool async             = false;
+    bool is_async          = false;
 };
 
 export struct NetworkConfig {
@@ -67,6 +67,8 @@ export class ConfigManager {
 
     static const Config &Get();
 
-    static Result<void> Save();
+    static Result<void> Load(Path);
+
+    static Result<void> Save(Path);
 };
 }  // namespace launcher
