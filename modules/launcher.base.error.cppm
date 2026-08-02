@@ -52,6 +52,9 @@ export enum class ErrorCategory {  // 错误类型
 
 export class Error {
   public:
+    Error(ErrorCategory category, ErrorCode code, StringView message, SharedPtr<Error> cause,
+            std::source_location location = std::source_location::current());
+
     Error(ErrorCategory category, ErrorCode code, StringView message,
             std::source_location location = std::source_location::current());
     [[nodiscard]]
@@ -62,7 +65,13 @@ export class Error {
     const std::source_location &Location() const noexcept;
 
     [[nodiscard]]
-    constexpr StringView ToString(ErrorCode) noexcept;
+    static constexpr StringView ToString(ErrorCode) noexcept;
+
+    [[nodiscard]]
+    static constexpr StringView ToString(ErrorCategory) noexcept;
+
+    [[nodiscard]]
+    String ToString() const noexcept;
 
     [[nodiscard]]
     ErrorCategory Category() const noexcept;
@@ -72,6 +81,7 @@ export class Error {
     ErrorCategory category_;
     String message_;
     std::source_location location_;
+    Optional<SharedPtr<Error>> cause_;
 };
 
 

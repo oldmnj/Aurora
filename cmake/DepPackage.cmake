@@ -46,10 +46,17 @@ find_or_fetch(spdlog spdlog::spdlog
     "1.17.0"
 )
 
-find_or_fetch(minizip-ng MINIZIP::minizip-ng
-    "https://github.com/zlib-ng/minizip-ng.git"
-    "4.2.2"
-)
+find_package(minizip-ng QUIET)
+
+if(TARGET MINIZIP::minizip-ng)
+    set(MINIZIP_TARGET MINIZIP::minizip-ng)
+elseif(TARGET MINIZIP::minizip)
+    set(MINIZIP_TARGET MINIZIP::minizip)
+elseif(TARGET minizip)
+    set(MINIZIP_TARGET minizip)
+else()
+    message("NOT FOUND target minizip-ng")
+endif()
 
 find_or_fetch(nlohmann_json nlohmann_json::nlohmann_json
     "https://github.com/nlohmann/json.git"

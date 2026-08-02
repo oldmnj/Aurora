@@ -9,6 +9,10 @@ Error::Error(
         ErrorCategory category, ErrorCode code, StringView message, std::source_location location)
     : code_(code), category_(category), message_(message), location_(location) {}
 
+Error::Error(ErrorCategory category, ErrorCode code, StringView message, SharedPtr<Error> cause,
+        std::source_location location)
+    : code_(code), category_(category), message_(message), location_(location), cause_(cause) {}
+
 [[nodiscard]] ErrorCode Error::Code() const noexcept { return this->code_; }
 
 [[nodiscard]] StringView Error::Message() const noexcept { return this->message_; }
@@ -78,4 +82,58 @@ constexpr StringView Error::ToString(ErrorCode code) noexcept {
         break;
     }
 }
+
+[[nodiscard]]
+constexpr StringView Error::ToString(ErrorCategory category) noexcept {
+    switch (category) {
+    case ErrorCategory::None:
+        return "None";
+    case ErrorCategory::Config:
+        return "Config";
+    case ErrorCategory::IO:
+        return "IO";
+    case ErrorCategory::Minecraft:
+        return "Minecraft";
+    case ErrorCategory::Network:
+        return "Network";
+    case ErrorCategory::Runtime:
+        return "Runtime";
+    case ErrorCategory::Security:
+        return "Security";
+    case ErrorCategory::System:
+        return "System";
+    default:
+        return "None";
+        break;
+    }
+}
+
+[[nodiscard]]
+String Error::ToString() const noexcept {
+    StringView filename = location_.file_name();
+    if (auto pos = filename.rfind('/'); pos != std::string_view::npos) {
+        filename.remove_prefix(pos + 1);
+    }
+#ifdef _WIN32
+    if (auto pos = filename.rfind('\\'); pos != std::string_view::npos) {
+        filename.remove_prefix(pos + 1);
+    }
+#endif
+
+    String result;
+    result.reserve(128);
+    result.append("[")
+            .append(ToString(category_))
+            .append("] ")
+            .append(ToString(code_))
+            .append(" message: ")
+            .append(message_)
+            .append(", at ")
+            .append(filename)
+            .append(":")
+            .append(std::to_string(location_.line()));
+
+    return String(result);
+}
+
 }  // namespace launcher
