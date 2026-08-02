@@ -7,6 +7,7 @@ module;
 #include <fstream>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <thread>
 
 module launcher.base;
@@ -213,44 +214,50 @@ Result<void> ConfigManager::Save(Path config_path) {
     }
 
     auto &config = *details::g_config;
-    nlohmann::json fconfig{
-            {"path",    {{"cache_dir", config.path.cache_directory.string()},
-                             {"temp_dir", config.path.temp_directory.string()},
-                             {"log_dir", config.path.log_directory.string()},
-                             {"runtime_dir", config.path.runtime_directory.string()}}},
-            {"logger",  {{"level",
-                                [&]() -> String {
-                                    switch (config.logger.level) {
-                                    case LogLevel::Trace:
-                                        return "trace";
-                                    case LogLevel::Debug:
-                                        return "debug";
-                                    case LogLevel::Info:
-                                        return "info";
-                                    case LogLevel::Warn:
-                                        return "warn";
-                                    case LogLevel::Error:
-                                        return "error";
-                                    case LogLevel::Critical:
-                                        return "critical";
+    nlohmann::json fconfig;
+    fconfig["path"]["cache_dir"]   = config.path.cache_directory.string();
+    fconfig["path"]["temp_dir"]    = config.path.temp_directory.string();
+    fconfig["path"]["log_dir"]     = config.path.log_directory.string();
+    fconfig["path"]["runtime_dir"] = config.path.runtime_directory.string();
 
-                                    case LogLevel::Off:
-                                        return "off";
-                                    }
-                                    return "info";
-                                }()},
-                               {"flush_immediately", config.logger.flush_immediately},
-                               {"console_output", config.logger.console_output},
-                               {"file_output", config.logger.file_output},
-                               {"file_name", config.logger.file_name.string()},
-                               {"async", config.logger.is_async}}                  },
-            {"network", {{"timeout", config.network.timeout.count()},
-                                {"retry_count", config.network.retry_count},
-                                {"verify_ssl", config.network.verify_ssl}}        },
-            {"runtime", {{"worker_threads", config.runtime.worker_threads},
-                                {"debug_mode", config.runtime.debug_mode},
-                                {"enable_cache", config.runtime.enable_cache}}    }
-    };
+    String level_str               = "info";
+    switch (config.logger.level) {
+    case LogLevel::Trace:
+        level_str = "trace";
+        break;
+    case LogLevel::Debug:
+        level_str = "debug";
+        break;
+    case LogLevel::Info:
+        level_str = "info";
+        break;
+    case LogLevel::Warn:
+        level_str = "warn";
+        break;
+    case LogLevel::Error:
+        level_str = "error";
+        break;
+    case LogLevel::Off:
+        level_str = "off";
+        break;
+    case LogLevel::Critical:
+        level_str = "critical";
+        break;
+    }
+    fconfig["logger"]["level"]             = level_str;
+    fconfig["logger"]["flush_immediately"] = config.logger.flush_immediately;
+    fconfig["logger"]["console_output"]    = config.logger.console_output;
+    fconfig["logger"]["file_output"]       = config.logger.file_output;
+    fconfig["logger"]["file_name"]         = config.logger.file_name.string();
+    fconfig["logger"]["is_async"]          = config.logger.is_async;
+
+    fconfig["network"]["timeout"]          = config.network.timeout.count();
+    fconfig["network"]["retry_count"]      = config.network.retry_count;
+    fconfig["network"]["verify_ssl"]       = config.network.verify_ssl;
+
+    fconfig["runtime"]["worker_threads"]   = config.runtime.worker_threads;
+    fconfig["runtime"]["debug_mode"]       = config.runtime.debug_mode;
+    fconfig["runtime"]["enable_cache"]     = config.runtime.enable_cache;
 
     try {
         if (!config_file.is_open()) {
@@ -260,6 +267,10 @@ Result<void> ConfigManager::Save(Path config_path) {
         }
         config_file << fconfig.dump(4);
     } catch (...) {
+        return std::unexpected<Error>{
+                Error{ErrorCategory::IO, ErrorCode::IOError,
+                      "在写入config的json文件时失败，也可能是系统问题，权限不够等等"}
+        };
     }
 
     return {};
