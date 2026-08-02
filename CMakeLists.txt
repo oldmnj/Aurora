@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1.0)
+cmake_minimum_required(VERSION 3.30.0)
 project(AuroraLuncherCore
     LANGUAGES CXX
     VERSION 0.1.0
@@ -14,14 +14,14 @@ project(AuroraLuncherCore
 
 include(cmake/Settings.cmake)
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/cmake/xrepo.cmake")
-    message(STATUS "Downloading xrepo.cmake from https://github.com/xmake-io/xrepo-cmake/")
-    file(DOWNLOAD 
-        "https://raw.githubusercontent.com/xmake-io/xrepo-cmake/main/xrepo.cmake"
-        "${PROJECT_BINARY_DIR}/cmake/xrepo.cmake"
-    )
-endif()
-include(${PROJECT_SOURCE_DIR}/cmake/xrepo.cmake)
+# if(NOT EXISTS "${PROJECT_SOURCE_DIR}/cmake/xrepo.cmake")
+#     message(STATUS "Downloading xrepo.cmake from https://github.com/xmake-io/xrepo-cmake/")
+#     file(DOWNLOAD 
+#         "https://raw.githubusercontent.com/xmake-io/xrepo-cmake/main/xrepo.cmake"
+#         "${PROJECT_BINARY_DIR}/cmake/xrepo.cmake"
+#     )
+# endif()
+# include(${PROJECT_SOURCE_DIR}/cmake/xrepo.cmake)
 include(cmake/DepPackage.cmake)
 
 add_subdirectory(src)

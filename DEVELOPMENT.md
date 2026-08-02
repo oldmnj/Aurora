@@ -17,7 +17,7 @@
 
 本项目使用CMake和Ninja构建工具
 
-CMake >= 4.1.0
+CMake >= 3.30.0
 
 Ninja: 无具体要求，但是尽量使用较新的版本
 
@@ -128,6 +128,11 @@ module命名:
 本项目使用LLVM代码规范
 在项目根目录提供.clang-format文件，用于commit之前格式化代码
 
+同时，由于本项目变量统一小写，所以get方法可以简写为大驼峰命名版的变量名，且需注意使用`[[nodiscard]]`,`noexpected`,`constexpr`等等修饰get方法
+
+### 内存管理规范
+写C++语言时，必须优先使用UniquePtr,RAII,SharedPtr管理内存，
+非特殊情况禁止使用delete/new, malloc/free
 
 ### 异常规范
 本项目提供包装std::expected的类型Result<T>类型返回错误，具体定义可见./modules/launcher.base.error.cppm
@@ -137,6 +142,18 @@ module命名:
 - 防止未知异常致使程序崩溃
 - 记录日志
 - 安全退出
+
+### API 设计规范
+public API:
+```cpp
+[[nodiscard]]
+Result<T>
+```
+必须
+```cpp
+const
+noexcept
+```
 
 
 ### 类型规范
@@ -150,6 +167,23 @@ Path
 Vector<T>
 ```
 在实际编写过程中尽量避免直接std::vector之类以保持风格统一
+
+
+### 第三方库规范
+
+本项目暂有依赖如下：
+```
+fmt
+spdlog
+nlohmann_json
+libcurl
+minizip-ng
+openssl
+```
+规定
+第三方库
+- 不能直接暴露第三方库的API给用户
+- 必须经过launcher封装
 
 
 ### PR规范

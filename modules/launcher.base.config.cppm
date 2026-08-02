@@ -60,4 +60,13 @@ export class Config {
     NetworkConfig network;
     RuntimeConfig runtime;
 };
+
+export class ConfigManager {
+  public:
+    static void Load();
+
+    static const Config &Get();
+
+    static Result<void> Save();
+};
 }  // namespace launcher
