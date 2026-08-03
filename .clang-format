@@ -10,7 +10,7 @@ PointerAlignment: Right
 QualifierAlignment: Left
 DerivePointerAlignment: false
 BreakBeforeBraces: Attach
-AlignAfterOpenBracket: DontAlign
+AlignAfterOpenBracket: BlockIndent
 AlignConsecutiveAssignments:
   Enabled: true
   AcrossEmptyLines: true
@@ -19,7 +19,7 @@ AlignConsecutiveAssignments:
   PadOperators: true
 AlignArrayOfStructures: Left
 AlignTrailingComments: true
-ColumnLimit: 100
+ColumnLimit: 80
 PenaltyReturnTypeOnItsOwnLine: 100
 PenaltyExcessCharacter: 100
 PenaltyBreakComment: 200
@@ -36,3 +36,4 @@ AlwaysBreakTemplateDeclarations: Yes
 NamespaceIndentation: None
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 4
+
