@@ -6,8 +6,8 @@ module;
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-module launcher.base;
-import :config;
+module aurora.service;
+import launcher.base;
 
 namespace launcher {
 /*

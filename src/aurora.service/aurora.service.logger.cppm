@@ -15,10 +15,8 @@ module;
 #include <spdlog/spdlog.h>
 #include <utility>
 
-export module launcher.base:logger;
-import :error;
-import :types;
-import :config;
+export module aurora.service:logger;
+import launcher.base;
 
 namespace launcher {
 

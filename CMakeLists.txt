@@ -25,7 +25,6 @@ include(cmake/Settings.cmake)
 include(cmake/DepPackage.cmake)
 
 add_subdirectory(src)
-add_subdirectory(modules)
 
 
 add_subdirectory(tests)
