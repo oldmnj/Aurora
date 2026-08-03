@@ -150,9 +150,9 @@ bool is_async; // 是否启用异步日志
 其中，建议多以全小写字母＋下划线_ 命名，布尔类型变量可使用 [is_, has_, enable_, should_]前缀命名，静态变量同样使用如上命名，静态常量请使用k＋大驼峰命名，类的成员变量在此命名规范技术上，变量名最后还需下划线_ 
 
 #### 文件命名
-模块文件应以.cppm为后缀，且位于./modules/目录下，
+模块文件应以.cppm为后缀，且位于./src/目录下，
 实现文件若需以.cc为后缀，且必须位于./src/下，
-非模块实现文件的cc文件，tests文件，examples文件等等都应以全小写字母＋下划线方式命名，不得使用大写字母和除下划线_外的特殊字符命名
+非模块实现文件的cc文件，tests文件，examples文件等等都应以全小写字母＋下划线方式命名，不得使用大写字母和除下划线_和点.外的特殊字符命名
 模块文件及实现文件命名规范见下方 模块规范
 
 #### namespace
@@ -178,9 +178,13 @@ module命名:
 模块命名使用launcher.xxx命名，文件名为launcher.xxx.cppm
 子模块命名使用launcher.xxx:xxxx命名，其中xxxx为子模块名，launcher.xxx是父模块名，子模块文件命名使用launcher.xxx.xxxx.cppm，xxxx为子模块名，launcher.xxx为父模块名，建议父模块文件仅作为导出子模块使用，否则可能容易导致模块间的循环依赖问题
 
+> 注意：在第二版重构代码后，需要将文件命名为aurora.xxx.xxxx.cppm，位于src/aurora.*/下，如果是launcher.base模块的，仍旧按照旧命名方式命名
+
 此处需注意： 写模块的实现文件.cc时，文件头部声明模块名因使用父模块名module launcher.xxx;，不应当使用module launcher.xxx:xxxx;，这是由于C++模块的限制，使用launcher.xxx:xxxx会导致编译失败，原因是编译器对于C++Module的规则集不同，这样写可以有效避免编译失败排查不出原因
 
 文件: 以.cppm结尾的模块声明接口文件，需位于./modules/目录下，且未在./modules/CMakeLists.txt文件target_sources()中的，应当按照模块依赖顺序排列模块文件，否则会导致编译失败，实现文件.cc，应当在src/xxx/下，子模块实现文件.cc可以在./src/xxx/xxxx/目录下，此处可以按子模块类名等等方式细分，或者亦可在./src/xxx/目录下，此时，此子模块不应有多个实现文件，仅可以有一个./src/xxx/xxxx.cc实现文件
+
+> 注意：在第二版代码重构后，实现文件.cc需位于src/**/或src/**/**/下，非base模块的实现文件需位于src/aurora/目录下，也可在此目录新建目录，base模块实现文件需在src/base/目录下
 
 ### 代码风格规范
 本项目使用LLVM代码规范

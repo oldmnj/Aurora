@@ -71,7 +71,7 @@ export class Error {
     static constexpr StringView ToString(ErrorCategory) noexcept;
 
     [[nodiscard]]
-    String ToString() const noexcept;
+    String ToString() const;
 
     [[nodiscard]]
     ErrorCategory Category() const noexcept;

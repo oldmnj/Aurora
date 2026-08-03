@@ -110,7 +110,7 @@ constexpr StringView Error::ToString(ErrorCategory category) noexcept {
 }
 
 [[nodiscard]]
-String Error::ToString() const noexcept {
+String Error::ToString() const {
     StringView filename = location_.file_name();
     if (auto pos = filename.rfind('/'); pos != StringView::npos) {
         filename.remove_prefix(pos + 1);

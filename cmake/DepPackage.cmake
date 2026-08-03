@@ -57,6 +57,7 @@ elseif(TARGET minizip)
 else()
     message("NOT FOUND target minizip-ng")
 endif()
+message("minizip target is ${MINIZIP_TARGET}")
 
 find_or_fetch(nlohmann_json nlohmann_json::nlohmann_json
     "https://github.com/nlohmann/json.git"

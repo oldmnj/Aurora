@@ -5,13 +5,10 @@
  * This is the core kernel module of the launcher.
  * For license details, see the LICENSE file in the root directory.
  */
-module;
-
-export module launcher.base;
-export import :types;
-export import :error;
-export import :platform;
-export import :build;
+export module aurora.service;
 export import :logger;
-export import :config;
-
+export import :io;
+export import :network;
+export import :archive;
+export import :cache;
+export import :auth;

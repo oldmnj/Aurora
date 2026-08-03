@@ -5,4 +5,13 @@
  * This is the core kernel module of the launcher.
  * For license details, see the LICENSE file in the root directory.
  */
-export module launcher.process;
+module;
+
+export module launcher.base;
+export import :types;
+export import :error;
+export import :platform;
+export import :build;
+// export import :logger;
+export import :config;
+
