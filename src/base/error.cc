@@ -7,16 +7,29 @@ module launcher.base;
 
 namespace launcher {
 Error::Error(
-        ErrorCategory category, ErrorCode code, StringView message, std::source_location location)
-    : code_(code), category_(category), message_(message), location_(location) {}
+        ErrorCategory category, ErrorCode code, StringView message,
+        std::source_location location
+)
+    : code_(code),
+      category_(category),
+      message_(message),
+      location_(location) {}
 
-Error::Error(ErrorCategory category, ErrorCode code, StringView message, SharedPtr<Error> cause,
-        std::source_location location)
-    : code_(code), category_(category), message_(message), location_(location), cause_(cause) {}
+Error::Error(
+        ErrorCategory category, ErrorCode code, StringView message,
+        SharedPtr<Error> cause, std::source_location location
+)
+    : code_(code),
+      category_(category),
+      message_(message),
+      location_(location),
+      cause_(cause) {}
 
 [[nodiscard]] ErrorCode Error::Code() const noexcept { return this->code_; }
 
-[[nodiscard]] StringView Error::Message() const noexcept { return this->message_; }
+[[nodiscard]] StringView Error::Message() const noexcept {
+    return this->message_;
+}
 
 [[nodiscard]] const std::source_location &Error::Location() const noexcept {
     return this->location_;
@@ -80,7 +93,6 @@ constexpr StringView Error::ToString(ErrorCode code) noexcept {
 
     default:
         return "Unknown";
-        break;
     }
 }
 
@@ -105,7 +117,6 @@ constexpr StringView Error::ToString(ErrorCategory category) noexcept {
         return "System";
     default:
         return "None";
-        break;
     }
 }
 

@@ -32,7 +32,7 @@ export class Logger {
 
     static void Shutdown();
 
-    static void SetLevel(LogLevel Level) noexcept;
+    static void SetLevel(LogLevel level) noexcept;
 
     static LogLevel Level() noexcept;
 

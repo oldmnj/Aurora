@@ -2,12 +2,10 @@ module;
 
 #include <algorithm>
 #include <chrono>
-#include <expected>
 #include <filesystem>
 #include <fstream>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 #include <thread>
 
 module launcher.base;
@@ -23,23 +21,23 @@ Result<void> Config::Validate() const {
             !std::filesystem::exists(this->path.log_directory) ||
             !std::filesystem::exists(this->path.temp_directory)
     */) {
-        return std::unexpected<Error>(
-                Error{ErrorCategory::Config, ErrorCode::InvalidArgument, "路径参数无效"});
+        return Err(
+                {ErrorCategory::Config, ErrorCode::InvalidArgument,
+                 "路径参数无效"}
+        );
     } else if (this->network.timeout <= std::chrono::seconds{0}) {
-        return std::unexpected<Error>{
-                Error{ErrorCategory::Config, ErrorCode::InvalidArgument, "超时参数不是正数"}
-        };
+        return Err(
+                {ErrorCategory::Config, ErrorCode::InvalidArgument,
+                 "超时参数不是正数"}
+        );
     } else if (this->runtime.worker_threads <= 0) {
-        return std::unexpected<Error>{
-                Error{ErrorCategory::Config, ErrorCode::InvalidArgument,
-                      "runtime: 线程数不能为非正整数"}
-        };
+        return Err(
+                {ErrorCategory::Config, ErrorCode::InvalidArgument,
+                 "runtime: 线程数不能为非正整数"}
+        );
     } else {
         return {};
     }
-    return std::unexpected<Error>{
-            Error{ErrorCategory::Config, ErrorCode::InternalError, "未知错误"}
-    };
 }
 
 void Config::Reset() {
@@ -62,9 +60,15 @@ void ConfigManager::Load() {
 }
 
 const Config &ConfigManager::Get() { return *details::g_config; }
+/*
+ * 需检查空指针，
+ * 不过马上就要写Context，暂时不修
+ */
 
 namespace {
-inline Path GetPathFromJson(const nlohmann::json &obj, const char *key, const char *default_val) {
+inline Path GetPathFromJson(
+        const nlohmann::json &obj, const char *key, const char *default_val
+) {
     auto it = obj.find(key);
     if (it != obj.end() && it->is_string()) {
         return Path(it->get<std::string>());
@@ -73,7 +77,8 @@ inline Path GetPathFromJson(const nlohmann::json &obj, const char *key, const ch
 }
 
 inline LogLevel GetLogLevelFromJson(
-        const nlohmann::json &obj, const char *key, LogLevel default_val) {
+        const nlohmann::json &obj, const char *key, LogLevel default_val
+) {
     auto it = obj.find(key);
     if (it != obj.end() && it->is_string()) {
         String level_str = it->get<String>();
@@ -96,7 +101,9 @@ inline LogLevel GetLogLevelFromJson(
 }
 
 inline std::chrono::seconds GetSecondsFromJson(
-        const nlohmann::json &obj, const char *key, std::chrono::seconds default_val) {
+        const nlohmann::json &obj, const char *key,
+        std::chrono::seconds default_val
+) {
     auto it = obj.find(key);
     if (it != obj.end() && it->is_number()) {
         return std::chrono::seconds(it->get<u32>());
@@ -104,7 +111,8 @@ inline std::chrono::seconds GetSecondsFromJson(
     return default_val;
 }
 
-inline u32 GetU32FromJson(const nlohmann::json &obj, const char *key, u32 default_val) {
+inline u32
+GetU32FromJson(const nlohmann::json &obj, const char *key, u32 default_val) {
     auto it = obj.find(key);
     if (it != obj.end() && it->is_number()) {
         return it->get<u32>();
@@ -112,7 +120,8 @@ inline u32 GetU32FromJson(const nlohmann::json &obj, const char *key, u32 defaul
     return default_val;
 }
 
-inline bool GetBoolFromJson(const nlohmann::json &obj, const char *key, bool default_val) {
+inline bool
+GetBoolFromJson(const nlohmann::json &obj, const char *key, bool default_val) {
     auto it = obj.find(key);
     if (it != obj.end() && it->is_boolean()) {
         return it->get<bool>();
@@ -123,70 +132,92 @@ inline bool GetBoolFromJson(const nlohmann::json &obj, const char *key, bool def
 
 Result<void> ConfigManager::Load(Path config_path) {
     if (config_path.empty()) {
-        return std::unexpected<Error>{
-                Error{ErrorCategory::IO, ErrorCode::ParseError, "路径参数为空"}
-        };
+        return Err({ErrorCategory::IO, ErrorCode::ParseError, "路径参数为空"});
     }
 
     if (!std::filesystem::exists(config_path)) {
-        return std::unexpected<Error>{
-                Error{ErrorCategory::IO, ErrorCode::ParseError, "参数提供的路径无效"}
-        };
+        return Err(
+                Error{ErrorCategory::IO, ErrorCode::ParseError,
+                      "参数提供的路径无效"}
+        );
     }
     std::ifstream config_file{config_path};
     if (!config_file.is_open()) {
-        return std::unexpected<Error>{
-                Error{ErrorCategory::IO, ErrorCode::IOError, "文件打开失败"}
-        };
+        return Err(Error{ErrorCategory::IO, ErrorCode::IOError, "文件打开失败"});
     }
     nlohmann::json config_json;
     config_file >> config_json;
 
-    if (auto it = config_json.find("path"); it != config_json.end() && it->is_object()) {
+    if (auto it = config_json.find("path");
+        it != config_json.end() && it->is_object()) {
         auto &path_config = *it;
 
-        auto get_path     = [&](const char *key, const char *default_val) -> Path {
-            if (auto iter = path_config.find(key); iter != path_config.end() && iter->is_string()) {
+        auto get_path = [&](const char *key, const char *default_val) -> Path {
+            if (auto iter = path_config.find(key);
+                iter != path_config.end() && iter->is_string()) {
                 return Path(iter->get<std::string>());
             }
             return Path(default_val);
         };
 
-        details::g_config->path = PathConfig{.cache_directory = get_path("cache_dir", "./cache"),
-                .temp_directory                               = get_path("temp_dir", "./tmp"),
-                .log_directory                                = get_path("log_dir", "./log"),
-                .runtime_directory = get_path("runtime_dir", "./runtime")};
+        details::g_config->path = PathConfig{
+                .cache_directory   = get_path("cache_dir", "./cache"),
+                .temp_directory    = get_path("temp_dir", "./tmp"),
+                .log_directory     = get_path("log_dir", "./log"),
+                .runtime_directory = get_path("runtime_dir", "./runtime")
+        };
     }
 
-    if (auto it = config_json.find("logger"); it != config_json.end() && it->is_object()) {
+    if (auto it = config_json.find("logger");
+        it != config_json.end() && it->is_object()) {
         auto &logger_config       = *it;
 
         details::g_config->logger = LoggerConfig{
-                .level             = GetLogLevelFromJson(logger_config, "level", LogLevel::Info),
-                .flush_immediately = GetBoolFromJson(logger_config, "flush_immediately", false),
-                .console_output    = GetBoolFromJson(logger_config, "console_output", true),
-                .file_output       = GetBoolFromJson(logger_config, "file_output", true),
-                .file_name         = GetPathFromJson(logger_config, "file_name", "launcher.log"),
-                .is_async          = GetBoolFromJson(logger_config, "is_async", false)};
+                .level = GetLogLevelFromJson(
+                        logger_config, "level", LogLevel::Info
+                ),
+                .flush_immediately = GetBoolFromJson(
+                        logger_config, "flush_immediately", false
+                ),
+                .console_output =
+                        GetBoolFromJson(logger_config, "console_output", true),
+                .file_output =
+                        GetBoolFromJson(logger_config, "file_output", true),
+                .file_name = GetPathFromJson(
+                        logger_config, "file_name", "launcher.log"
+                ),
+                .is_async = GetBoolFromJson(logger_config, "is_async", false)
+        };
     }
 
-    if (auto it = config_json.find("network"); it != config_json.end() && it->is_object()) {
+    if (auto it = config_json.find("network");
+        it != config_json.end() && it->is_object()) {
         auto &network_config       = *it;
 
         details::g_config->network = NetworkConfig{
-                .timeout = GetSecondsFromJson(network_config, "timeout", std::chrono::seconds{30}),
+                .timeout = GetSecondsFromJson(
+                        network_config, "timeout", std::chrono::seconds{30}
+                ),
                 .retry_count = GetU32FromJson(network_config, "retry_count", 3),
-                .verify_ssl  = GetBoolFromJson(network_config, "verify_ssl", true)};
+                .verify_ssl =
+                        GetBoolFromJson(network_config, "verify_ssl", true)
+        };
     }
 
-    if (auto it = config_json.find("runtime"); it != config_json.end() && it->is_object()) {
-        auto &runtime_config = *it;
+    if (auto it = config_json.find("runtime");
+        it != config_json.end() && it->is_object()) {
+        auto &runtime_config       = *it;
 
-        details::g_config->runtime =
-                RuntimeConfig{.worker_threads = GetU32FromJson(runtime_config, "worker_threads",
-                                      std::max(4u, std::thread::hardware_concurrency())),
-                        .debug_mode   = GetBoolFromJson(runtime_config, "debug_mode", false),
-                        .enable_cache = GetBoolFromJson(runtime_config, "enable_cache", true)};
+        details::g_config->runtime = RuntimeConfig{
+                .worker_threads = GetU32FromJson(
+                        runtime_config, "worker_threads",
+                        std::max(4u, std::thread::hardware_concurrency())
+                ),
+                .debug_mode =
+                        GetBoolFromJson(runtime_config, "debug_mode", false),
+                .enable_cache =
+                        GetBoolFromJson(runtime_config, "enable_cache", true)
+        };
     }
 
     return {};
@@ -194,26 +225,28 @@ Result<void> ConfigManager::Load(Path config_path) {
 
 Result<void> ConfigManager::Save(Path config_path) {
     if (config_path.empty()) {
-        return std::unexpected<Error>{
+        return Err(
                 Error{ErrorCategory::IO, ErrorCode::ParseError, "路径参数为空"}
-        };
+        );
     }
 
-    if (!std::filesystem::exists(config_path)) {
-        return std::unexpected<Error>{
-                Error{ErrorCategory::IO, ErrorCode::IOError, "参数提供的路径无效"}
-        };
-    }
+    /*
+        if (!std::filesystem::exists(config_path)) {
+            return Err(
+                    Error{ErrorCategory::IO, ErrorCode::IOError,
+                          "参数提供的路径无效"}
+            );
+        }
+    */
 
     std::ofstream config_file(config_path);
 
     if (!config_file.is_open()) {
-        return std::unexpected<Error>{
-                Error{ErrorCategory::IO, ErrorCode::IOError, "文件打开失败"}
-        };
+        return Err(Error{ErrorCategory::IO, ErrorCode::IOError, "文件打开失败"});
     }
 
     auto &config = *details::g_config;
+    // 这里需要防止nullptr，不过马上就要写Context，到时候删
     nlohmann::json fconfig;
     fconfig["path"]["cache_dir"]   = config.path.cache_directory.string();
     fconfig["path"]["temp_dir"]    = config.path.temp_directory.string();
@@ -260,17 +293,13 @@ Result<void> ConfigManager::Save(Path config_path) {
     fconfig["runtime"]["enable_cache"]     = config.runtime.enable_cache;
 
     try {
-        if (!config_file.is_open()) {
-            return std::unexpected<Error>{
-                    Error{ErrorCategory::IO, ErrorCode::IOError, "文件打开失败"}
-            };
-        }
         config_file << fconfig.dump(4);
     } catch (...) {
-        return std::unexpected<Error>{
+        return Err(
                 Error{ErrorCategory::IO, ErrorCode::IOError,
-                      "在写入config的json文件时失败，也可能是系统问题，权限不够等等"}
-        };
+                      "在写入config的json文件时失败，也可能是系统问题，权限不够"
+                      "等等"}
+        );
     }
 
     return {};

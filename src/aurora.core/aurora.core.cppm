@@ -7,4 +7,5 @@
  */
 export module aurora.core;
 export import :context;
+export import :task;
 export import :event;

@@ -68,19 +68,24 @@ Result<void> Logger::Initialize(const LoggerConfig &config) {
 
     if (config.file_output) {
         sinks.push_back(
-                std::make_shared<spdlog::sinks::basic_file_sink_mt>(config.file_name.string()));
+                std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+                        config.file_name.string()
+                )
+        );
     }
 
 
     if (sinks.empty()) {
-        return std::unexpected<launcher::Error>{
-                launcher::Error{ErrorCategory::Runtime, ErrorCode::InvalidArgument,
-                                "Logger没有任何输出目标"}
-        };
+        return Err(
+                {ErrorCategory::Runtime, ErrorCode::InvalidArgument,
+                 "Logger没有任何输出目标"}
+        );
     }
 
 
-    auto logger = std::make_shared<spdlog::logger>("launcher", sinks.begin(), sinks.end());
+    auto logger = std::make_shared<spdlog::logger>(
+            "launcher", sinks.begin(), sinks.end()
+    );
 
 
     logger->set_level(details::ToSpdlogLevel(config.level));
@@ -112,13 +117,16 @@ void Logger::Shutdown() {
         spdlog::drop("launcher");
         details::g_logger.reset();
     }
+    // 这里可能有点问题，但是马上会写Context统一调动
 }
 
 LogLevel Logger::Level() noexcept { return details::current_level; }
 
-void Logger::SetLevel(LogLevel Level) noexcept {
-    details::g_logger->set_level(details::ToSpdlogLevel(Level));
-    details::current_level = Level;
+void Logger::SetLevel(LogLevel level) noexcept {
+    if (details::g_logger) {
+        details::g_logger->set_level(details::ToSpdlogLevel(level));
+    }
+    details::current_level = level;
 }
 
 }  // namespace launcher

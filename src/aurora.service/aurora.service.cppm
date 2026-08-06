@@ -9,6 +9,7 @@ export module aurora.service;
 export import :logger;
 export import :io;
 export import :network;
+export import :crypto;
 export import :archive;
 export import :cache;
 export import :auth;
