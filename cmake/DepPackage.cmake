@@ -13,7 +13,7 @@ macro(find_or_fetch packageName targetName gitRepo gitTag)
     endif()
 
     if(NOT ${packageName}_FOUND)
-        message(SHATUS "[Deps] ${packageName} NOT FOUND, Try Fetching From ${gitRepo}")
+        message(STATUS "[Deps] ${packageName} NOT FOUND, Try Fetching From ${gitRepo}")
         FetchContent_Declare(
             ${_lc_name}
             GIT_REPOSITORY ${gitRepo}

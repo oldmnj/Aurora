@@ -11,7 +11,8 @@ export struct BuildInfo {
 
     StringView name;  // projectName(KernelName)
 
-    StringView compiler;  // 记录compiler，来源__clang_version__宏，__VERSION__等等
+    StringView
+            compiler;  // 记录compiler，来源__clang_version__宏，__VERSION__等等
 
     StringView build_type;  // Debug, Release等等，建议使用xmake注入宏
 
@@ -33,6 +34,6 @@ constexpr BuildInfo info{
 };
 */
 // export const BuildInfo &CurrentBuildInfo() noexcept;
-// 返回引用类型，原因：BuildIofo全局唯一
+// 返回引用类型，原因：BuildInfo全局唯一
 
 }  // namespace launcher
