@@ -28,11 +28,14 @@ target_sources(AuroraCore
             aurora.service/aurora.service.io.cppm
             aurora.service/aurora.service.network.cppm
             aurora.service/aurora.service.crypto.cppm
+            aurora.service/aurora.service.download.cppm
             aurora.service/aurora.service.archive.cppm
             aurora.service/aurora.service.cache.cppm
             aurora.service/aurora.service.auth.cppm
             aurora.service/aurora.service.cppm
 
+            aurora.core/aurora.core.pool.cppm
+            aurora.core/aurora.core.scheduler.cppm
             aurora.core/aurora.core.context.cppm
             aurora.core/aurora.core.task.cppm
             aurora.core/aurora.core.event.cppm

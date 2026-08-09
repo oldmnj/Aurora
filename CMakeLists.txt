@@ -26,5 +26,4 @@ include(cmake/DepPackage.cmake)
 
 add_subdirectory(src)
 
-
 add_subdirectory(tests)

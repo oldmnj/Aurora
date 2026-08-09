@@ -5,9 +5,4 @@
  * This is the core kernel module of the launcher.
  * For license details, see the LICENSE file in the root directory.
  */
-export module aurora.core;
-export import :pool;
-export import :scheduler;
-export import :context;
-export import :task;
-export import :event;
+export module aurora.core:scheduler;
