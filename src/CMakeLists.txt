@@ -21,9 +21,10 @@ target_sources(AuroraCore
             launcher.base/launcher.base.error.cppm
             launcher.base/launcher.base.build.cppm
             launcher.base/launcher.base.config.cppm
-            launcher.base/launcher.base.uuid.cppm
             launcher.base/launcher.base.cppm
 
+            aurora.service/aurora.service.random.cppm
+            aurora.service/aurora.service.uuid.cppm
             aurora.service/aurora.service.logger.cppm
             aurora.service/aurora.service.io.cppm
             aurora.service/aurora.service.network.cppm

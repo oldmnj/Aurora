@@ -45,6 +45,7 @@ export enum class ErrorCategory {  // 错误类型
     None,
 
     System,
+    Parse,
     IO,
     Network,
     Security,
@@ -488,7 +489,6 @@ class Result<void, E> {
         this->destroy();
     }
 
-    // ========== 状态查询 ==========
     [[nodiscard]]
     constexpr bool HasValue() const noexcept {
         return this->has_value_;

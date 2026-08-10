@@ -6,6 +6,8 @@
  * For license details, see the LICENSE file in the root directory.
  */
 export module aurora.service;
+export import :random;
+export import :uuid;
 export import :logger;
 export import :io;
 export import :network;

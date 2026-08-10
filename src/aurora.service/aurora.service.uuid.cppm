@@ -7,9 +7,4 @@
  */
 module;
 
-export module launcher.base;
-export import :types;
-export import :error;
-export import :platform;
-export import :build;
-export import :config;
+export module aurora.service:uuid;
