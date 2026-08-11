@@ -32,6 +32,7 @@ target_sources(AuroraCore
             aurora.service/aurora.service.download.cppm
             aurora.service/aurora.service.archive.cppm
             aurora.service/aurora.service.cache.cppm
+            aurora.service/aurora.service.quickjs.cppm
             aurora.service/aurora.service.auth.cppm
             aurora.service/aurora.service.cppm
 
@@ -75,5 +76,6 @@ target_link_libraries(AuroraCore
         ${MINIZIP_TARGET}
         OpenSSL::SSL
         OpenSSL::Crypto
+        qjs
 )
 

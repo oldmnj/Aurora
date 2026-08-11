@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30.0)
 project(AuroraLauncherCore
-    LANGUAGES CXX
+    LANGUAGES CXX C
     VERSION 0.1.0
 )
 
@@ -23,6 +23,7 @@ include(cmake/Settings.cmake)
 # endif()
 # include(${PROJECT_SOURCE_DIR}/cmake/xrepo.cmake)
 include(cmake/DepPackage.cmake)
+include(cmake/QuickJS.cmake)
 
 add_subdirectory(src)
 

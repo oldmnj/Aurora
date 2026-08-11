@@ -14,4 +14,5 @@ export import :network;
 export import :crypto;
 export import :archive;
 export import :cache;
+export import :quickjs;
 export import :auth;
