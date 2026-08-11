@@ -64,5 +64,10 @@ find_or_fetch(nlohmann_json nlohmann_json::nlohmann_json
     "3.12.0"
 )
 
+find_or_fetch(qjs qjs 
+    "https://github.com/quickjs-ng/quickjs.git"
+    "0.16.1"
+)
+
 find_package(OpenSSL REQUIRED)
 find_package(CURL REQUIRED)

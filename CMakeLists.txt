@@ -23,7 +23,7 @@ include(cmake/Settings.cmake)
 # endif()
 # include(${PROJECT_SOURCE_DIR}/cmake/xrepo.cmake)
 include(cmake/DepPackage.cmake)
-include(cmake/QuickJS.cmake)
+# include(cmake/QuickJS.cmake)
 
 add_subdirectory(src)
 
