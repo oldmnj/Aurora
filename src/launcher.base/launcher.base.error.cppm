@@ -86,7 +86,7 @@ export class Error {
     ErrorCategory category_;
     String message_;
     std::source_location location_;
-    Optional<SharedPtr<Error>> cause_;
+    UniquePtr<Error> cause_;
 };
 
 /*
@@ -97,10 +97,13 @@ using Result = std::expected<T, Error>;
 namespace details {
 template <typename T, typename E>
 union ResultStorage {
+    struct Dummy {
+        char _;
+    } dummy;  ///< 这里必须要有一个非value和error的变量，否则默认构造是UB
     T value;
     E error;
 
-    ResultStorage() {}
+    ResultStorage() : dummy{} {}
     ~ResultStorage() {}
 
     constexpr void destroy(bool has_value) noexcept(
@@ -341,6 +344,26 @@ class Result {
 
     template <typename F>
     [[nodiscard]]
+    auto Map(F &&f) const & {
+        using U = std::invoke_result_t<F, const T &>;
+        if (has_value_) {
+            return Result<U, E>{InPlaceValueTag{}, std::forward<F>(f)()};
+        }
+        return Result<U, E>{InPlaceErrorTag{}, storage_.error};
+    }
+
+    template <typename F>
+    [[nodiscard]]
+    auto Map(F &&f) && {
+        using U = std::invoke_result_t<F, T &&>;
+        if (has_value_) {
+            return Result<U, E>{InPlaceValueTag{}, std::forward<F>(f)()};
+        }
+        return Result<U, E>{InPlaceErrorTag{}, std::move(storage_.error)};
+    }
+
+    template <typename F>
+    [[nodiscard]]
     auto AndThen(F &&f) & {
         using U = std::invoke_result_t<F, T &>;
         static_assert(
@@ -351,6 +374,34 @@ class Result {
             return std::forward<F>(f)(storage_.value);
         }
         return U{InPlaceErrorTag{}, storage_.error};
+    }
+
+    template <typename F>
+    [[nodiscard]]
+    auto AndThen(F &&f) const & {
+        using U = std::invoke_result_t<F, const T &>;
+        static_assert(
+                std::is_same_v<typename U::ErrorType, E>,
+                "Chained Result must use same Error type"
+        );
+        if (has_value_) {
+            return std::forward<F>(f)(storage_.value);
+        }
+        return U{InPlaceErrorTag{}, storage_.error};
+    }
+
+    template <typename F>
+    [[nodiscard]]
+    auto AndThen(F &&f) && {
+        using U = std::invoke_result_t<F, T &&>;
+        static_assert(
+                std::is_same_v<typename U::ErrorType, E>,
+                "Chained Result must use same Error type"
+        );
+        if (has_value_) {
+            return std::forward<F>(f)(std::move(storage_.value));
+        }
+        return U{InPlaceErrorTag{}, std::move(storage_.error)};
     }
 
     template <typename F>
@@ -366,6 +417,38 @@ class Result {
             return std::forward<F>(f)(storage_.error);
         }
         return U{InPlaceValueTag{}, storage_.value};
+    }
+
+
+    template <typename F>
+    [[nodiscard]]
+    constexpr auto OrElse(F &&f) const & {
+        using U = std::invoke_result_t<F, const E &>;
+        static_assert(
+                std::is_same_v<typename U::ValueType, T>,
+                "OrElse must preserve value type"
+        );
+
+        if (!has_value_) {
+            return std::forward<F>(f)(storage_.error);
+        }
+        return U{InPlaceValueTag{}, storage_.value};
+    }
+
+
+    template <typename F>
+    [[nodiscard]]
+    constexpr auto OrElse(F &&f) && {
+        using U = std::invoke_result_t<F, E &&>;
+        static_assert(
+                std::is_same_v<typename U::ValueType, T>,
+                "OrElse must preserve value type"
+        );
+
+        if (!has_value_) {
+            return std::forward<F>(f)(std::move(storage_.error));
+        }
+        return U{InPlaceValueTag{}, std::move(storage_.value)};
     }
 
     template <typename F>
@@ -660,7 +743,7 @@ class Result<void, E> {
     template <typename F>
     constexpr Result &IfValue(F &&f) & {
         if (has_value_) {
-            std::forward<F>(f)();
+            std::forward<F>(f)();  /// 这里没有value值可传，所以为无参函数调用
         }
         return *this;
     }

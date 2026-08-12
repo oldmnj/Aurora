@@ -42,5 +42,5 @@ htmlcov/
 bin/
 lib/
 output/
-third_party
+third_party/
 *.bak
