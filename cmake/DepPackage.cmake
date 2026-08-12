@@ -38,12 +38,12 @@ endmacro()
 
 find_or_fetch(fmt fmt::fmt
     "https://github.com/fmtlib/fmt.git"
-    "11.2.0"
+    "v11.2.0"
 )
 
 find_or_fetch(spdlog spdlog::spdlog
     "https://github.com/gabime/spdlog.git"
-    "1.17.0"
+    "v1.17.0"
 )
 
 find_package(minizip-ng QUIET)
@@ -61,12 +61,12 @@ message("minizip target is ${MINIZIP_TARGET}")
 
 find_or_fetch(nlohmann_json nlohmann_json::nlohmann_json
     "https://github.com/nlohmann/json.git"
-    "3.12.0"
+    "v3.12.0"
 )
 
 find_or_fetch(qjs qjs 
     "https://github.com/quickjs-ng/quickjs.git"
-    "0.16.1"
+    "v0.16.1"
 )
 
 find_package(OpenSSL REQUIRED)

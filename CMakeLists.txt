@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30.0)
+cmake_minimum_required(VERSION 3.28.0)
 project(AuroraLauncherCore
     LANGUAGES CXX C
     VERSION 0.1.0

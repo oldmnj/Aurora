@@ -15,16 +15,6 @@ Error::Error(
       message_(message),
       location_(location) {}
 
-Error::Error(
-        ErrorCategory category, ErrorCode code, StringView message,
-        SharedPtr<Error> cause, std::source_location location
-)
-    : code_(code),
-      category_(category),
-      message_(message),
-      location_(location),
-      cause_(cause) {}
-
 [[nodiscard]] ErrorCode Error::Code() const noexcept { return this->code_; }
 
 [[nodiscard]] StringView Error::Message() const noexcept {

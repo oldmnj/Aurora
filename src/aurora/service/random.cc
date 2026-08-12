@@ -1,6 +1,7 @@
 module;
 
 #include <openssl/rand.h>
+#include <span>
 #include <utility>
 
 module aurora.service;
@@ -33,9 +34,9 @@ auto Random::Bytes(usize size) -> Result<launcher::Bytes> {
     }
     launcher::Bytes buffer{size};
 
-    auto result = Fill(buffer);
+    auto result = Fill(std::span<std::byte>{buffer});
     if (result.HasError()) {
-        return Err<launcher::Bytes, Error>(result.Error());
+        return Err<launcher::Bytes>(std::move(result.Error()));
     }
     return Ok<launcher::Bytes>(std::move(buffer));
 }
