@@ -11,9 +11,8 @@ import :types;
 
 namespace launcher {
 export enum class ErrorCode {
-    // 通用错误
     Ok,
-
+    // 通用错误
     InvalidArgument,
     InvalidState,
     Unsupported,
@@ -343,7 +342,9 @@ class Result {
     auto Map(F &&f) const & {
         using U = std::invoke_result_t<F, const T &>;
         if (has_value_) {
-            return Result<U, E>{InPlaceValueTag{}, std::forward<F>(f)()};
+            return Result<U, E>{
+                    InPlaceValueTag{}, std::forward<F>(f)(storage_.value)
+            };
         }
         return Result<U, E>{InPlaceErrorTag{}, storage_.error};
     }
@@ -383,7 +384,7 @@ class Result {
         if (has_value_) {
             return std::forward<F>(f)(storage_.value);
         }
-        return U{InPlaceErrorTag{}, storage_.error};
+        return U{InPlaceErrorTag{}, std::move(storage_.error)};
     }
 
     template <typename F>

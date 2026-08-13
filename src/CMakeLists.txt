@@ -13,7 +13,7 @@ add_library(AuroraCore SHARED)
 target_sources(AuroraCore
     PRIVATE
         FILE_SET CXX_MODULES
-        BASE_DIRS ${PROJECT_SOURCE_DIR}/src/
+        BASE_DIRS ${CMAKE_SOURCE_DIR}/src/
         FILES
         # 第一阶段，base&io
             launcher.base/launcher.base.types.cppm
@@ -65,8 +65,7 @@ target_include_directories(AuroraCore
         ${PROJECT_SOURCE_DIR}/third_party
 )
 
-target_link_libraries(AuroraCore
-    PRIVATE
+set(DEPS_MODULE_CORE
         nlohmann_json::nlohmann_json
         fmt::fmt
         spdlog::spdlog
@@ -75,5 +74,12 @@ target_link_libraries(AuroraCore
         OpenSSL::SSL
         OpenSSL::Crypto
         qjs
+        yaml-cpp::yaml-cpp
 )
 
+target_link_libraries(AuroraCore
+    PRIVATE
+        ${DEPS_MODULE_CORE}
+)
+
+add_subdirectory(cli)

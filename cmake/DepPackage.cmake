@@ -56,16 +56,15 @@ find_or_fetch(nlohmann_json nlohmann_json::nlohmann_json
     "v3.12.0"
 )
 
+find_or_fetch(yaml-cpp yaml-cpp::yaml-cpp
+    "https://github.com/jbeder/yaml-cpp.git"
+    "v0.9.0"
+)
+
 # qjs: v0.16.1
 find_or_fetch(qjs qjs
     "https://github.com/quickjs-ng/quickjs.git"
     "v0.16.1"
-)
-
-# minizip-ng: 4.2.2（注意：不带 v 前缀）
-find_or_fetch(minizip-ng MINIZIP::minizip-ng
-    "https://github.com/zlib-ng/minizip-ng.git"
-    "4.2.2"
 )
 
 # OpenSSL: openssl-3.6.3
@@ -80,17 +79,39 @@ find_or_fetch(CURL CURL::libcurl
     "curl-8_21_0"
 )
 
-# ============ minizip-ng 目标名兼容处理 ============
-# 注意：minizip-ng 的 target 名称可能因版本而异，提前处理防止宏报错
-if(NOT TARGET MINIZIP::minizip-ng)
-    if(TARGET MINIZIP::minizip)
-        set(MINIZIP_TARGET MINIZIP::minizip)
-    elseif(TARGET minizip)
-        set(MINIZIP_TARGET minizip)
-    else()
-        message(FATAL_ERROR "[Deps] minizip-ng target not found. Check build output.")
-    endif()
+# minizip-ng
+message(STATUS "[Deps] Checking minizip-ng...")
+find_package(minizip-ng QUIET)
+
+if(NOT minizip-ng_FOUND)
+    message(STATUS "[Deps] minizip-ng NOT FOUND, fetching from GitHub...")
+    
+    FetchContent_Declare(
+        minizip-ng
+        GIT_REPOSITORY "https://github.com/zlib-ng/minizip-ng.git"
+        GIT_TAG "4.0.7"
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+    )
+    
+    FetchContent_MakeAvailable(minizip-ng)
+    message(STATUS "[Deps] minizip-ng fetched and built")
 else()
-    set(MINIZIP_TARGET MINIZIP::minizip-ng)
+    message(STATUS "[Deps] minizip-ng found system-wide: ${minizip-ng_DIR}")
 endif()
+
+if(TARGET minizip-ng::minizip-ng)
+    set(MINIZIP_TARGET minizip-ng::minizip-ng)
+elseif(TARGET minizip-ng::minizip)
+    set(MINIZIP_TARGET minizip-ng::minizip)
+elseif(TARGET MINIZIP::minizip-ng)
+    set(MINIZIP_TARGET MINIZIP::minizip-ng)
+elseif(TARGET MINIZIP::minizip)
+    set(MINIZIP_TARGET MINIZIP::minizip)
+elseif(TARGET minizip)
+    set(MINIZIP_TARGET minizip)
+else()
+    message(FATAL_ERROR "[Deps] minizip-ng target not found. Available targets: ${minizip-ng_TARGETS}")
+endif()
+
 message(STATUS "[Deps] minizip target is ${MINIZIP_TARGET}")

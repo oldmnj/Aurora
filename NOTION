@@ -1,0 +1,62 @@
+================================================================================
+Third-Party Libraries
+================================================================================
+
+--------------------------------------------------------------------------------
+CLI11
+Copyright (c) 2017-2024 University of Cincinnati, developed by Henry Schreiner
+License: BSD-3-Clause
+Source: https://github.com/CLIUtils/CLI11
+
+--------------------------------------------------------------------------------
+fmt
+Copyright (c) 2012-present, Victor Zverovich and {fmt} contributors
+License: MIT
+Source: https://github.com/fmtlib/fmt
+
+--------------------------------------------------------------------------------
+spdlog
+Copyright (c) 2016-2026 Gabi Melman
+License: MIT
+Source: https://github.com/gabime/spdlog
+
+--------------------------------------------------------------------------------
+nlohmann_json
+Copyright (c) 2013-2026 Niels Lohmann
+License: MIT
+Source: https://github.com/nlohmann/json
+
+--------------------------------------------------------------------------------
+yaml-cpp
+Copyright (c) 2008-present Jesse Beder
+License: MIT
+Source: https://github.com/jbeder/yaml-cpp
+
+--------------------------------------------------------------------------------
+OpenSSL
+Copyright (c) 1998-2023 The OpenSSL Project
+License: Apache License 2.0 (OpenSSL 3.0+)
+Source: https://github.com/openssl/openssl
+
+--------------------------------------------------------------------------------
+libcurl
+Copyright (c) 1996-2024 Daniel Stenberg and contributors
+License: curl license
+Source: https://github.com/curl/curl
+
+--------------------------------------------------------------------------------
+minizip-ng
+Copyright (c) 1995-2021 Jean-loup Gailly and Mark Adler
+Copyright (c) 2018-present Nathan Moinvaziri
+License: BSD-3-Clause
+Source: https://github.com/zlib-ng/minizip-ng
+
+--------------------------------------------------------------------------------
+QuickJS-NG
+Copyright (c) 2017-present Fabrice Bellard and Charlie Gordon (original QuickJS)
+Copyright (c) 2022-present QuickJS-NG contributors
+License: MIT
+Source: https://github.com/quickjs-ng/quickjs
+
+================================================================================
+Full license texts are available in the third_party/ directory.

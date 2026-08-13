@@ -44,5 +44,4 @@ lib/
 output/
 release/
 debug/
-third_party/
 *.bak

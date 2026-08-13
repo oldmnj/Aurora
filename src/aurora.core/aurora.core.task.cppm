@@ -33,7 +33,7 @@ struct TaskPromise {
 
     std::suspend_never initial_suspend() noexcept { return {}; }
 
-    std::suspend_always final_susupend() noexcept { return {}; }
+    std::suspend_always final_suspend() noexcept { return {}; }
 
     void return_value(T &&value) {
         result = Ok<T, E>(std::move(value));
@@ -66,16 +66,16 @@ struct TaskPromise<void, E> {
         };
     }
 
-    std::suspend_never initial_suspend() { return {}; }
+    std::suspend_never initial_suspend() noexcept { return {}; }
 
-    std::suspend_always final_susupend() { return {}; }
+    std::suspend_always final_suspend() noexcept { return {}; }
 
     void return_void() {
         result = Ok<void, E>();
         done   = true;
     }
 
-    void unhandled_exception() {
+    void unhandled_exception() noexcept {
         result = Err<void, E>(
                 {ErrorCategory::Runtime, ErrorCode::InternalError,
                  "unhandle exception in coroutine"}
@@ -98,7 +98,9 @@ class Task {
         other.handle_ = nullptr;
     }
 
-    Task &operator=(Task &&other) noexcept {
+    Task &operator=(
+            Task &&other
+    ) noexcept(std::is_nothrow_move_assignable_v<Handle>) {
         if (this != &other) {
             if (handle_)
                 handle_.destroy();
