@@ -11,7 +11,7 @@ message(${AURORA_SRC})
 add_library(AuroraCore SHARED)
 
 target_sources(AuroraCore
-    PUBLIC
+    PRIVATE
         FILE_SET CXX_MODULES
         BASE_DIRS ${PROJECT_SOURCE_DIR}/src/
         FILES
@@ -66,10 +66,8 @@ target_include_directories(AuroraCore
 )
 
 target_link_libraries(AuroraCore
-    PUBLIC
-        nlohmann_json::nlohmann_json
-
     PRIVATE
+        nlohmann_json::nlohmann_json
         fmt::fmt
         spdlog::spdlog
         CURL::libcurl

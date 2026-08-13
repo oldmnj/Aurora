@@ -23,8 +23,10 @@ include(cmake/Settings.cmake)
 # endif()
 # include(${PROJECT_SOURCE_DIR}/cmake/xrepo.cmake)
 include(cmake/DepPackage.cmake)
-# include(cmake/QuickJS.cmake)
+include(cmake/BuildOption.cmake)
 
 add_subdirectory(src)
-
 add_subdirectory(tests)
+
+include(cmake/InstallRules.cmake)
+include(cmake/CPackConfig.cmake)
