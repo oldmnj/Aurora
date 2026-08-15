@@ -1,3 +1,16 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 oldmnj <oldmnj@163.com>
+ *
+ * This is the core kernel module of the launcher.
+ * For license details, see the LICENSE file in the root directory.
+ */
+/**
+ * @file launcher.base.error.cppm
+ * @brief 提供统一的错误处理类型
+ * @anthor oldmnj
+ * @date 2026-08-15
+ */
 module;
 
 #include <memory>

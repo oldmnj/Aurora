@@ -1,3 +1,9 @@
+/**
+ * @file system.cc
+ * @brief 有关架构及版本信息都详细实现
+ * @anthor oldmnj
+ * @date 2026-08-15
+ */
 module;
 
 #include <bit>
@@ -37,7 +43,9 @@ Architecture CurrentArchitecture() noexcept {
 
 bool Is64Bit() noexcept { return sizeof(void *) == 8; }
 
-bool IsLittleEndian() noexcept { return std::endian::native == std::endian::little; }
+bool IsLittleEndian() noexcept {
+    return std::endian::native == std::endian::little;
+}
 
 constexpr StringView ToString(Platform p) noexcept {
     switch (p) {

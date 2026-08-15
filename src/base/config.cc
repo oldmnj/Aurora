@@ -1,3 +1,9 @@
+/**
+ * @file config.cc
+ * @brief 配置相关的实现
+ * @anthor oldmnj
+ * @date 2026-08-15
+ */
 module;
 
 #include <algorithm>
@@ -47,9 +53,12 @@ void Config::Reset() {
     this->logger  = LoggerConfig{};
 }
 
+/// 注: 原有ConfigManager及其所有实现全部删除，config将于上层context/app管理
+/*
 namespace details {
 static SharedPtr<Config> g_config;
-// 此处把g_config写在details命名空间可以不被导出符号，以免cppm中的static成员变量会导出符号
+//
+此处把g_config写在details命名空间可以不被导出符号，以免cppm中的static成员变量会导出符号
 }  // namespace details
 void ConfigManager::Load() {
     details::g_config          = std::make_shared<Config>();
@@ -64,7 +73,7 @@ const Config &ConfigManager::Get() { return *details::g_config; }
  * 需检查空指针，
  * 不过马上就要写Context，暂时不修
  */
-
+/*
 namespace {
 inline Path GetPathFromJson(
         const nlohmann::json &obj, const char *key, const char *default_val
@@ -143,7 +152,8 @@ Result<void> ConfigManager::Load(Path config_path) {
     }
     std::ifstream config_file{config_path};
     if (!config_file.is_open()) {
-        return Err(Error{ErrorCategory::IO, ErrorCode::IOError, "文件打开失败"});
+        return Err(Error{ErrorCategory::IO, ErrorCode::IOError,
+"文件打开失败"});
     }
     nlohmann::json config_json;
     config_file >> config_json;
@@ -238,11 +248,12 @@ Result<void> ConfigManager::Save(Path config_path) {
             );
         }
     */
-
+/*
     std::ofstream config_file(config_path);
 
     if (!config_file.is_open()) {
-        return Err(Error{ErrorCategory::IO, ErrorCode::IOError, "文件打开失败"});
+        return Err(Error{ErrorCategory::IO, ErrorCode::IOError,
+"文件打开失败"});
     }
 
     auto &config = *details::g_config;
@@ -304,5 +315,6 @@ Result<void> ConfigManager::Save(Path config_path) {
 
     return {};
 }
+*/
 
 }  // namespace launcher

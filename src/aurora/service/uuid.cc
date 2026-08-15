@@ -181,4 +181,6 @@ bool UUID::operator==(const UUID &other) const noexcept {
     return data_ == other.data_;
 }
 
+UUID::UUID(const std::array<u8, 16> &data) : data_(data) {}
+
 }  // namespace launcher
