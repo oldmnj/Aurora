@@ -31,7 +31,7 @@ export class UUID {
     std::array<u8, 16> data_;
 
   public:
-    constexpr UUID() noexcept;
+    constexpr UUID() noexcept = default;
 
     explicit UUID(const std::array<u8, 16> &data);
 
