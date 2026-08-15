@@ -27,12 +27,6 @@ License: MIT
 Source: https://github.com/nlohmann/json
 
 --------------------------------------------------------------------------------
-yaml-cpp
-Copyright (c) 2008-present Jesse Beder
-License: MIT
-Source: https://github.com/jbeder/yaml-cpp
-
---------------------------------------------------------------------------------
 OpenSSL
 Copyright (c) 1998-2023 The OpenSSL Project
 License: Apache License 2.0 (OpenSSL 3.0+)

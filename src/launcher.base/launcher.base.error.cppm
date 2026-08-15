@@ -106,8 +106,10 @@ union ResultStorage {
             std::is_nothrow_destructible_v<E>
     ) {
         if (has_value) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             std::destroy_at(std::addressof(value));
         } else {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             std::destroy_at(std::addressof(error));
         }
     }
@@ -123,6 +125,7 @@ union ResultStorage<void, E> {
     constexpr void
     destroy(bool has_value) noexcept(std::is_nothrow_destructible_v<E>) {
         if (!has_value) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             std::destroy_at(std::addressof(error));
         }
     }
@@ -354,7 +357,10 @@ class Result {
     auto Map(F &&f) && {
         using U = std::invoke_result_t<F, T &&>;
         if (has_value_) {
-            return Result<U, E>{InPlaceValueTag{}, std::forward<F>(f)()};
+            return Result<U, E>{
+                    InPlaceValueTag{},
+                    std::forward<F>(f)(std::move(storage_.value))
+            };
         }
         return Result<U, E>{InPlaceErrorTag{}, std::move(storage_.error)};
     }

@@ -74,7 +74,7 @@ set(DEPS_MODULE_CORE
         OpenSSL::SSL
         OpenSSL::Crypto
         qjs
-        yaml-cpp::yaml-cpp
+#         yaml-cpp::yaml-cpp
 )
 
 target_link_libraries(AuroraCore

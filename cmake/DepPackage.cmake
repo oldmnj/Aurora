@@ -56,10 +56,10 @@ find_or_fetch(nlohmann_json nlohmann_json::nlohmann_json
     "v3.12.0"
 )
 
-find_or_fetch(yaml-cpp yaml-cpp::yaml-cpp
-    "https://github.com/jbeder/yaml-cpp.git"
-    "v0.9.0"
-)
+# find_or_fetch(yaml-cpp yaml-cpp::yaml-cpp
+#     "https://github.com/jbeder/yaml-cpp.git"
+#     "v0.9.0"
+# )
 
 # qjs: v0.16.1
 find_or_fetch(qjs qjs
