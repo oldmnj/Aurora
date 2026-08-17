@@ -15,41 +15,41 @@ target_sources(AuroraCore
         BASE_DIRS ${CMAKE_SOURCE_DIR}/src/
         FILES
         # 第一阶段，base&io
-            launcher.base/launcher.base.types.cppm
-            launcher.base/launcher.base.platform.cppm
-            launcher.base/launcher.base.error.cppm
-            launcher.base/launcher.base.build.cppm
-            launcher.base/launcher.base.config.cppm
-            launcher.base/launcher.base.cppm
+            launcher/base/types.cppm
+            launcher/base/platform.cppm
+            launcher/base/error.cppm
+            launcher/base/build.cppm
+            launcher/base/config.cppm
+            launcher/base/base.cppm
 
-            aurora.service/aurora.service.random.cppm
-            aurora.service/aurora.service.uuid.cppm
-            aurora.service/aurora.service.logger.cppm
-            aurora.service/aurora.service.io.cppm
-            aurora.service/aurora.service.network.cppm
-            aurora.service/aurora.service.crypto.cppm
-            aurora.service/aurora.service.download.cppm
-            aurora.service/aurora.service.archive.cppm
-            aurora.service/aurora.service.cache.cppm
-            aurora.service/aurora.service.quickjs.cppm
-            aurora.service/aurora.service.auth.cppm
-            aurora.service/aurora.service.cppm
+            aurora/service/random.cppm
+            aurora/service/uuid.cppm
+            aurora/service/logger.cppm
+            aurora/service/io.cppm
+            aurora/service/network.cppm
+            aurora/service/crypto.cppm
+            aurora/service/download.cppm
+            aurora/service/archive.cppm
+            aurora/service/cache.cppm
+            aurora/service/quickjs.cppm
+            aurora/service/auth.cppm
+            aurora/service/service.cppm
 
-            aurora.core/aurora.core.pool.cppm
-            aurora.core/aurora.core.scheduler.cppm
-            aurora.core/aurora.core.context.cppm
-            aurora.core/aurora.core.task.cppm
-            aurora.core/aurora.core.event.cppm
-            aurora.core/aurora.core.cppm
+            aurora/core/pool.cppm
+            aurora/core/scheduler.cppm
+            aurora/core/context.cppm
+            aurora/core/task.cppm
+            aurora/core/event.cppm
+            aurora/core/core.cppm
 
-            aurora.runtime/aurora.runtime.version.cppm
-            aurora.runtime/aurora.runtime.assets.cppm
-            aurora.runtime/aurora.runtime.jvm.cppm
-            aurora.runtime/aurora.runtime.process.cppm
-            aurora.runtime/aurora.runtime.launch.cppm
-            aurora.runtime/aurora.runtime.loader.cppm
-            aurora.runtime/aurora.runtime.plugin.cppm
-            aurora.runtime/aurora.runtime.cppm
+            aurora/runtime/version.cppm
+            aurora/runtime/assets.cppm
+            aurora/runtime/jvm.cppm
+            aurora/runtime/process.cppm
+            aurora/runtime/launch.cppm
+            aurora/runtime/loader.cppm
+            aurora/runtime/plugin.cppm
+            aurora/runtime/runtime.cppm
             
 )
 
