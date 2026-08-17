@@ -1,9 +1,8 @@
 file(GLOB AURORA_SRC
-        # ${PROJECT_SOURCE_DIR}/modules/*.cppm
-        ${PROJECT_SOURCE_DIR}/src/base/*.cc
-        # ${PROJECT_SOURCE_DIR}/src/base/**/*.cc
-        ${PROJECT_SOURCE_DIR}/src/aurora/service/*.cc
-        ${PROJECT_SOURCE_DIR}/src/aurora/*.cc
+        ${CMAKE_SOURCE_DIR}/src/impl/base/*.cc
+        ${CMAKE_SOURCE_DIR}/src/impl/service/*.cc
+        ${CMAKE_SOURCE_DIR}/src/impl/core/*.cc
+        ${CMAKE_SOURCE_DIR}/src/impl/runtime/*.cc
 )
 
 message(${AURORA_SRC})
@@ -81,5 +80,3 @@ target_link_libraries(AuroraCore
     PRIVATE
         ${DEPS_MODULE_CORE}
 )
-
-add_subdirectory(cli)
