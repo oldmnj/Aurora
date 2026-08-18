@@ -8,9 +8,6 @@
 #   ./tools/run-scan-build.sh --html       # 分析并自动打开 HTML 报告
 #   ./tools/run-scan-build.sh --sarif      # 输出 SARIF 格式（供 CI 集成）
 #
-# 前置要求：
-#   pkg install clang        # scan-build 已内置于 clang 包
-#   pip install scanview     # scan-view 用于查看结果
 # =============================================================================
 
 set -e

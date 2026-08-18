@@ -8,6 +8,7 @@
 module;
 
 #include <filesystem>
+#include <fstream>
 #include <nlohmann/json.hpp>
 
 export module aurora.service:io;
@@ -26,6 +27,18 @@ export class IO {
     static auto ReadText(Path) -> Result<String>;
 
     static auto WriteText(Path, StringView) -> Result<void>;
+
+    static auto OpenFile(Path) -> Result<std::ifstream>;
+
+    static auto OpenText(Path) -> Result<std::ifstream>;
+
+    static auto CreateFile(Path) -> Result<std::ofstream>;
+
+    static auto CreateText(Path) -> Result<std::ofstream>;
+
+    static auto AppendFile(Path) -> Result<std::ofstream>;
+
+    static auto AppendText(Path) -> Result<std::ofstream>;
 
     static auto Mkdirs(Path) -> Result<void>;
 

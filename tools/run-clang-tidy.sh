@@ -38,8 +38,6 @@ echo "Files: ${#SOURCES[@]}"
 [[ -n "$FIX_ARGS" ]] && echo "Mode: --fix"
 echo ""
 
-# Termux Clang 21 对单 check 名（如 bugprone-null-dereference）有 ASTMatcher crash，
-# 必须用 glob 模式（bugprone-*）才能稳定运行
 CHECKS='bugprone-*,cppcoreguidelines-*,modernize-*,readability-*,clang-analyzer.*'
 
 for src in "${SOURCES[@]}"; do
