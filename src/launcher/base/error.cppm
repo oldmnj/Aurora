@@ -18,6 +18,7 @@ module;
 #include <source_location>
 #include <type_traits>
 #include <utility>
+#include <variant>
 
 export module launcher.base:error;
 import :types;
@@ -33,6 +34,7 @@ export enum class ErrorCode {
     // IO
     IOError,
     FileNotFound,
+    FileTooLarge,
     PermissionDenied,
 
     // 网络
@@ -97,55 +99,6 @@ export class Error {
     // UniquePtr<Error> cause_;
 };
 
-/*
-export template <typename T>
-using Result = std::expected<T, Error>;
-*/
-
-namespace details {
-template <typename T, typename E>
-union ResultStorage {
-    struct Dummy {
-        char _;
-    } dummy;  ///< 这里必须要有一个非value和error的变量，否则默认构造是UB
-    T value;
-    E error;
-
-    ResultStorage() : dummy{} {}
-    ~ResultStorage() {}
-
-    constexpr void destroy(bool has_value) noexcept(
-            std::is_nothrow_destructible_v<T> &&
-            std::is_nothrow_destructible_v<E>
-    ) {
-        if (has_value) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            std::destroy_at(std::addressof(value));
-        } else {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            std::destroy_at(std::addressof(error));
-        }
-    }
-};
-
-template <typename E>
-union ResultStorage<void, E> {
-    E error;
-
-    ResultStorage() {}
-    ~ResultStorage() {}
-
-    constexpr void
-    destroy(bool has_value) noexcept(std::is_nothrow_destructible_v<E>) {
-        if (!has_value) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            std::destroy_at(std::addressof(error));
-        }
-    }
-};
-
-}  // namespace details
-
 export struct InPlaceValueTag {};
 export struct InPlaceErrorTag {};
 
@@ -153,9 +106,7 @@ export template <typename T, typename E = Error>
 class Result {
   private:
     [[no_unique_address]] bool has_value_ = false;
-    details::ResultStorage<T, E> storage_;
-
-    void destroy() { this->storage_.destroy(this->has_value_); }
+    std::variant<T, E> storage_;
 
   public:
     using ValueType = T;
@@ -163,16 +114,12 @@ class Result {
 
     template <typename... Args>
     constexpr Result(InPlaceValueTag, Args &&...args) : has_value_(true) {
-        std::construct_at(
-                std::addressof(storage_.value), std::forward<Args>(args)...
-        );
+        storage_.template emplace<0>(std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     constexpr Result(InPlaceErrorTag, Args &&...args) : has_value_(false) {
-        std::construct_at(
-                std::addressof(storage_.error), std::forward<Args>(args)...
-        );
+        storage_.template emplace<1>(std::forward<Args>(args)...);
     }
 
     constexpr Result(T &&value) : Result{InPlaceValueTag{}, std::move(value)} {}
@@ -181,49 +128,19 @@ class Result {
     constexpr Result(E &&error) : Result{InPlaceErrorTag{}, std::move(error)} {}
     constexpr Result(const E &error) : Result{InPlaceErrorTag{}, error} {}
 
-    constexpr Result(const Result &other) : has_value_(other.has_value_) {
-        if (has_value_) {
-            std::construct_at(
-                    std::addressof(storage_.value), other.storage_.value
-            );
-        } else {
-            std::construct_at(
-                    std::addressof(storage_.error), other.storage_.error
-            );
-        }
-    }
+    constexpr Result(const Result &other)
+        : has_value_(other.has_value_), storage_(other.storage_) {}
 
     constexpr Result(Result &&other) noexcept(
             std::is_nothrow_move_constructible_v<T> &&
             std::is_nothrow_move_assignable_v<E>
     )
-        : has_value_(other.has_value_) {
-        if (has_value_) {
-            std::construct_at(
-                    std::addressof(storage_.value),
-                    std::move(other.storage_.value)
-            );
-        } else {
-            std::construct_at(
-                    std::addressof(storage_.error),
-                    std::move(other.storage_.error)
-            );
-        }
-    }
+        : has_value_(other.has_value_), storage_(std::move(other.storage_)) {}
 
     constexpr Result &operator=(const Result &other) {
         if (this != &other) {
-            this->destroy();  // 不析构直接覆盖是未定义行为
-            this->has_value_ = other.has_value_;
-            if (this->has_value_) {
-                std::construct_at(
-                        std::addressof(storage_.value), other.storage_.value
-                );
-            } else {
-                std::construct_at(
-                        std::addressof(storage_.error), other.storage_.error
-                );
-            }
+            storage_   = other.storage_;
+            has_value_ = other.has_value_;
         }
         return *this;
     }
@@ -233,19 +150,8 @@ class Result {
             std::is_nothrow_move_constructible_v<E>
     ) {
         if (this != &other) {
-            this->destroy();
+            this->storage_   = std::move(other.storage_);
             this->has_value_ = other.has_value_;
-            if (this->has_value_) {
-                std::construct_at(
-                        std::addressof(storage_.value),
-                        std::move(other.storage_.value)
-                );
-            } else {
-                std::construct_at(
-                        std::addressof(storage_.error),
-                        std::move(other.storage_.error)
-                );
-            }
         }
         return *this;
     }
@@ -253,9 +159,7 @@ class Result {
     constexpr ~Result() noexcept(
             std::is_nothrow_destructible_v<T> &&
             std::is_nothrow_destructible_v<E>
-    ) {
-        this->destroy();
-    }
+    ) = default;
 
     [[nodiscard]] constexpr bool HasValue() const noexcept {
         return this->has_value_;
@@ -273,72 +177,77 @@ class Result {
 
     [[nodiscard]]
     constexpr T &Value() & {
-        return storage_.value;
+        return std::get<0>(storage_);
     }
 
     [[nodiscard]]
     constexpr const T &Value() const & {
-        return storage_.value;
+        return std::get<0>(storage_);
     }
 
     [[nodiscard]]
     constexpr T &&Value() && {
-        return std::move(storage_.value);
+        return std::get<0>(std::move(storage_));
     }
 
     [[nodiscard]]
     constexpr const T &&Value() const && {
-        return std::move(storage_.value);
+        return std::get<0>(std::move(storage_));
     }
 
 
     template <typename U>
     [[nodiscard]]
     constexpr T ValueOr(U &&default_value) const & {
-        return has_value_ ? storage_.value
+        return has_value_ ? std::get<0>(storage_)
                           : static_cast<T>(std::forward<U>(default_value));
     }
 
     template <typename U>
     [[nodiscard]]
     constexpr T ValueOr(U &&default_value) && {
-        return has_value_ ? std::move(storage_.value)
+        return has_value_ ? std::get<0>(std::move(storage_))
                           : static_cast<T>(std::forward<U>(default_value));
     }
 
     [[nodiscard]]
     constexpr E &Error() & {
-        return storage_.error;
+        return std::get<1>(storage_);
     }
 
     [[nodiscard]]
     constexpr const E &Error() const & {
-        return storage_.error;
+        return std::get<1>(storage_);
     }
 
     [[nodiscard]]
     constexpr E &&Error() && {
-        return std::move(storage_.error);
+        return std::get<1>(std::move(storage_));
+    }
+
+    [[nodiscard]]
+    constexpr const E &&Error() const && {
+        return std::get<1>(std::move(storage_));
     }
 
     [[nodiscard]]
     constexpr T *operator->() {
-        return std::addressof(storage_.value);
+        return std::addressof(std::get<0>(storage_));
     }
 
     [[nodiscard]]
     constexpr const T *operator->() const {
-        return std::addressof(storage_.value);
+        return std::addressof(std::get<0>(storage_));
     }
 
     [[nodiscard]]
     constexpr T &operator*() & {
-        return storage_.value;
+        return std::get<0>(storage_);
     }
 
     [[nodiscard]]
     constexpr const T &operator*() const & {
-        return storage_.value;
+        return std::get<0>(storage_);
     }
 
     template <typename F>
@@ -347,10 +256,10 @@ class Result {
         using U = std::invoke_result_t<F, T &>;
         if (has_value_) {
             return Result<U, E>{
-                    InPlaceValueTag{}, std::forward<F>(f)(storage_.value)
+                    InPlaceValueTag{}, std::forward<F>(f)(std::get<0>(storage_))
             };
         }
-        return Result<U, E>{InPlaceErrorTag{}, storage_.error};
+        return Result<U, E>{InPlaceErrorTag{}, std::get<1>(storage_)};
     }
 
     template <typename F>
@@ -359,10 +268,10 @@ class Result {
         using U = std::invoke_result_t<F, const T &>;
         if (has_value_) {
             return Result<U, E>{
-                    InPlaceValueTag{}, std::forward<F>(f)(storage_.value)
+                    InPlaceValueTag{}, std::forward<F>(f)(std::get<0>(storage_))
             };
         }
-        return Result<U, E>{InPlaceErrorTag{}, storage_.error};
+        return Result<U, E>{InPlaceErrorTag{}, std::get<1>(storage_)};
     }
 
     template <typename F>
@@ -372,10 +281,10 @@ class Result {
         if (has_value_) {
             return Result<U, E>{
                     InPlaceValueTag{},
-                    std::forward<F>(f)(std::move(storage_.value))
+                    std::forward<F>(f)(std::get<0>(std::move(storage_)))
             };
         }
-        return Result<U, E>{InPlaceErrorTag{}, std::move(storage_.error)};
+        return Result<U, E>{InPlaceErrorTag{}, std::get<1>(std::move(storage_))};
     }
 
     template <typename F>
@@ -387,9 +296,9 @@ class Result {
                 "Chained Result must use same Error type"
         );
         if (has_value_) {
-            return std::forward<F>(f)(storage_.value);
+            return std::forward<F>(f)(std::get<0>(storage_));
         }
-        return U{InPlaceErrorTag{}, storage_.error};
+        return U{InPlaceErrorTag{}, std::get<1>(storage_)};
     }
 
     template <typename F>
@@ -401,9 +310,9 @@ class Result {
                 "Chained Result must use same Error type"
         );
         if (has_value_) {
-            return std::forward<F>(f)(storage_.value);
+            return std::forward<F>(f)(std::get<0>(storage_));
         }
-        return U{InPlaceErrorTag{}, std::move(storage_.error)};
+        return U{InPlaceErrorTag{}, std::get<1>(storage_)};
     }
 
     template <typename F>
@@ -415,9 +324,9 @@ class Result {
                 "Chained Result must use same Error type"
         );
         if (has_value_) {
-            return std::forward<F>(f)(std::move(storage_.value));
+            return std::forward<F>(f)(std::get<0>(std::move(storage_)));
         }
-        return U{InPlaceErrorTag{}, std::move(storage_.error)};
+        return U{InPlaceErrorTag{}, std::get<1>(std::move(storage_))};
     }
 
     template <typename F>
@@ -430,9 +339,9 @@ class Result {
         );
 
         if (!has_value_) {
-            return std::forward<F>(f)(storage_.error);
+            return std::forward<F>(f)(std::get<1>(storage_));
         }
-        return U{InPlaceValueTag{}, storage_.value};
+        return U{InPlaceValueTag{}, std::get<0>(storage_)};
     }
 
 
@@ -446,9 +355,9 @@ class Result {
         );
 
         if (!has_value_) {
-            return std::forward<F>(f)(storage_.error);
+            return std::forward<F>(f)(std::get<1>(storage_));
         }
-        return U{InPlaceValueTag{}, storage_.value};
+        return U{InPlaceValueTag{}, std::get<0>(storage_)};
     }
 
 
@@ -462,15 +371,15 @@ class Result {
         );
 
         if (!has_value_) {
-            return std::forward<F>(f)(std::move(storage_.error));
+            return std::forward<F>(f)(std::get<1>(std::move(storage_)));
         }
-        return U{InPlaceValueTag{}, std::move(storage_.value)};
+        return U{InPlaceValueTag{}, std::get<0>(std::move(storage_))};
     }
 
     template <typename F>
     constexpr Result &IfValue(F &&f) & {
         if (has_value_) {
-            std::forward<F>(f)(storage_.value);
+            std::forward<F>(f)(std::get<0>(storage_));
         }
         return *this;
     }
@@ -478,7 +387,7 @@ class Result {
     template <typename F>
     constexpr const Result &IfValue(F &&f) const & {
         if (has_value_) {
-            std::forward<F>(f)(storage_.value);
+            std::forward<F>(f)(std::get<0>(storage_));
         }
         return *this;
     }
@@ -486,7 +395,7 @@ class Result {
     template <typename F>
     constexpr Result &IfError(F &&f) & {
         if (!has_value_) {
-            std::forward<F>(f)(storage_.error);
+            std::forward<F>(f)(std::get<1>(storage_));
         }
         return *this;
     }
@@ -494,7 +403,7 @@ class Result {
     template <typename F>
     constexpr const Result &IfError(F &&f) const & {
         if (!has_value_) {
-            std::forward<F>(f)(storage_.error);
+            std::forward<F>(f)(std::get<1>(storage_));
         }
         return *this;
     }
@@ -505,26 +414,26 @@ export template <typename E>
 class Result<void, E> {
   private:
     [[no_unique_address]] bool has_value_ = false;
-    details::ResultStorage<void, E> storage_;
-
-    void destroy() { this->storage_.destroy(this->has_value_); }
+    std::variant<std::monostate, E> storage_;
 
   public:
     using ValueType = void;
     using ErrorType = E;
 
     // 默认构造 = 成功
-    constexpr Result() noexcept : has_value_(true) {}
+    constexpr Result() noexcept : has_value_(true) {
+        storage_.template emplace<0>(std::monostate{});
+    }
 
     // 显式成功构造
-    constexpr Result(InPlaceValueTag) noexcept : has_value_(true) {}
+    constexpr Result(InPlaceValueTag) noexcept : has_value_(true) {
+        storage_.template emplace<0>(std::monostate{});
+    }
 
     // 错误构造
     template <typename... Args>
     constexpr Result(InPlaceErrorTag, Args &&...args) : has_value_(false) {
-        std::construct_at(
-                std::addressof(storage_.error), std::forward<Args>(args)...
-        );
+        storage_.template emplace<1>(std::forward<Args>(args)...);
     }
 
     // 从错误值隐式构造
@@ -532,37 +441,20 @@ class Result<void, E> {
     constexpr Result(const E &error) : Result{InPlaceErrorTag{}, error} {}
 
     // 拷贝构造
-    constexpr Result(const Result &other) : has_value_(other.has_value_) {
-        if (!has_value_) {
-            std::construct_at(
-                    std::addressof(storage_.error), other.storage_.error
-            );
-        }
-    }
+    constexpr Result(const Result &other)
+        : has_value_(other.has_value_), storage_(other.storage_) {}
 
     // 移动构造
     constexpr Result(
             Result &&other
     ) noexcept(std::is_nothrow_move_constructible_v<E>)
-        : has_value_(other.has_value_) {
-        if (!has_value_) {
-            std::construct_at(
-                    std::addressof(storage_.error),
-                    std::move(other.storage_.error)
-            );
-        }
-    }
+        : has_value_(other.has_value_), storage_(std::move(other.storage_)) {}
 
     // 拷贝赋值
     constexpr Result &operator=(const Result &other) {
         if (this != &other) {
-            this->destroy();
+            this->storage_   = other.storage_;
             this->has_value_ = other.has_value_;
-            if (!this->has_value_) {
-                std::construct_at(
-                        std::addressof(storage_.error), other.storage_.error
-                );
-            }
         }
         return *this;
     }
@@ -571,22 +463,14 @@ class Result<void, E> {
     constexpr Result &
     operator=(Result &&other) noexcept(std::is_nothrow_move_assignable_v<E>) {
         if (this != &other) {
-            this->destroy();
+            this->storage_   = std::move(other.storage_);
             this->has_value_ = other.has_value_;
-            if (!this->has_value_) {
-                std::construct_at(
-                        std::addressof(storage_.error),
-                        std::move(other.storage_.error)
-                );
-            }
         }
         return *this;
     }
 
     // 析构
-    constexpr ~Result() noexcept(std::is_nothrow_destructible_v<E>) {
-        this->destroy();
-    }
+    constexpr ~Result() noexcept(std::is_nothrow_destructible_v<E>) = default;
 
     [[nodiscard]]
     constexpr bool HasValue() const noexcept {
@@ -606,22 +490,22 @@ class Result<void, E> {
     // ========== 错误访问 ==========
     [[nodiscard]]
     constexpr E &Error() & {
-        return storage_.error;
+        return std::get<1>(storage_);
     }
 
     [[nodiscard]]
     constexpr const E &Error() const & {
-        return storage_.error;
+        return std::get<1>(storage_);
     }
 
     [[nodiscard]]
     constexpr E &&Error() && {
-        return std::move(storage_.error);
+        return std::get<1>(std::move(storage_));
     }
 
     [[nodiscard]]
     constexpr const E &&Error() const && {
-        return std::move(storage_.error);
+        return std::get<1>(std::move(storage_));
     }
 
     // ========== 函数式操作 ==========
@@ -634,7 +518,7 @@ class Result<void, E> {
         if (has_value_) {
             return Result<U, E>{InPlaceValueTag{}, std::forward<F>(f)()};
         }
-        return Result<U, E>{InPlaceErrorTag{}, storage_.error};
+        return Result<U, E>{InPlaceErrorTag{}, std::get<1>(storage_)};
     }
 
     template <typename F>
@@ -644,7 +528,7 @@ class Result<void, E> {
         if (has_value_) {
             return Result<U, E>{InPlaceValueTag{}, std::forward<F>(f)()};
         }
-        return Result<U, E>{InPlaceErrorTag{}, storage_.error};
+        return Result<U, E>{InPlaceErrorTag{}, std::get<1>(storage_)};
     }
 
     template <typename F>
@@ -654,7 +538,7 @@ class Result<void, E> {
         if (has_value_) {
             return Result<U, E>{InPlaceValueTag{}, std::forward<F>(f)()};
         }
-        return Result<U, E>{InPlaceErrorTag{}, std::move(storage_.error)};
+        return Result<U, E>{InPlaceErrorTag{}, std::get<1>(std::move(storage_))};
     }
 
     // AndThen: void -> Result<U, E>
@@ -669,7 +553,7 @@ class Result<void, E> {
         if (has_value_) {
             return std::forward<F>(f)();
         }
-        return U{InPlaceErrorTag{}, storage_.error};
+        return U{InPlaceErrorTag{}, std::get<1>(storage_)};
     }
 
     template <typename F>
@@ -683,7 +567,7 @@ class Result<void, E> {
         if (has_value_) {
             return std::forward<F>(f)();
         }
-        return U{InPlaceErrorTag{}, storage_.error};
+        return U{InPlaceErrorTag{}, std::get<1>(storage_)};
     }
 
     template <typename F>
@@ -697,7 +581,7 @@ class Result<void, E> {
         if (has_value_) {
             return std::forward<F>(f)();
         }
-        return U{InPlaceErrorTag{}, std::move(storage_.error)};
+        return U{InPlaceErrorTag{}, std::get<1>(std::move(storage_))};
     }
 
     // OrElse: 失败时处理错误
@@ -714,7 +598,7 @@ class Result<void, E> {
                 "OrElse must preserve error type"
         );
         if (!has_value_) {
-            return std::forward<F>(f)(storage_.error);
+            return std::forward<F>(f)(std::get<1>(storage_));
         }
         return U{InPlaceValueTag{}};
     }
@@ -732,7 +616,7 @@ class Result<void, E> {
                 "OrElse must preserve error type"
         );
         if (!has_value_) {
-            return std::forward<F>(f)(storage_.error);
+            return std::forward<F>(f)(std::get<1>(storage_));
         }
         return U{InPlaceValueTag{}};
     }
@@ -750,7 +634,7 @@ class Result<void, E> {
                 "OrElse must preserve error type"
         );
         if (!has_value_) {
-            return std::forward<F>(f)(std::move(storage_.error));
+            return std::forward<F>(f)(std::get<1>(std::move(storage_)));
         }
         return U{InPlaceValueTag{}};
     }
@@ -775,7 +659,7 @@ class Result<void, E> {
     template <typename F>
     constexpr Result &IfError(F &&f) & {
         if (!has_value_) {
-            std::forward<F>(f)(storage_.error);
+            std::forward<F>(f)(std::get<1>(storage_));
         }
         return *this;
     }
@@ -783,7 +667,7 @@ class Result<void, E> {
     template <typename F>
     constexpr const Result &IfError(F &&f) const & {
         if (!has_value_) {
-            std::forward<F>(f)(storage_.error);
+            std::forward<F>(f)(std::get<1>(storage_.error));
         }
         return *this;
     }
