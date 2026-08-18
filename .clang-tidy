@@ -1,0 +1,12 @@
+---
+Checks: >
+  bugprone-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  readability-*,
+  clang-analyzer.*
+
+HeaderFilterRegex: 'src/.*'
+SystemHeaders: false
+ImplementationFileExtensions: [cc, cpp, cxx]
+HeaderFileExtensions: [cppm, h, hh, hpp]

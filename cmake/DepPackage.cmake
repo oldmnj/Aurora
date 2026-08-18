@@ -23,9 +23,9 @@ macro(find_or_fetch packageName targetName gitRepo gitTag)
         )
         FetchContent_MakeAvailable(${_lc_name})
 
-        message(STATUS "[Deps] ${PACKAGE_NAME} fetched and built")
+        message(STATUS "[Deps] ${packageName} fetched and built")
     else()
-        message(STATUS "[Deps] ${PACKAGE_NAME} found system-wide: ${${PACKAGE_NAME}_DIR}")
+        message(STATUS "[Deps] ${packageName} found system-wide: ${${packageName}_DIR}")
     endif()
 
     if(NOT TARGET ${targetName})
@@ -36,33 +36,82 @@ macro(find_or_fetch packageName targetName gitRepo gitTag)
     endif()
 endmacro()
 
+# ============ 依赖声明 ============
+
+# fmt: v11.2.0
 find_or_fetch(fmt fmt::fmt
     "https://github.com/fmtlib/fmt.git"
-    "11.2.0"
+    "v11.2.0"
 )
 
+# spdlog: v1.17.0
 find_or_fetch(spdlog spdlog::spdlog
     "https://github.com/gabime/spdlog.git"
-    "1.17.0"
+    "v1.17.0"
 )
 
+# nlohmann_json: v3.12.0
+find_or_fetch(nlohmann_json nlohmann_json::nlohmann_json
+    "https://github.com/nlohmann/json.git"
+    "v3.12.0"
+)
+
+# find_or_fetch(yaml-cpp yaml-cpp::yaml-cpp
+#     "https://github.com/jbeder/yaml-cpp.git"
+#     "v0.9.0"
+# )
+
+# qjs: v0.16.1
+find_or_fetch(qjs qjs
+    "https://github.com/quickjs-ng/quickjs.git"
+    "v0.16.1"
+)
+
+# OpenSSL: openssl-3.6.3
+find_or_fetch(OpenSSL OpenSSL::SSL
+    "https://github.com/openssl/openssl.git"
+    "openssl-3.6.3"
+)
+
+# CURL: curl-8_21_0
+find_or_fetch(CURL CURL::libcurl
+    "https://github.com/curl/curl.git"
+    "curl-8_21_0"
+)
+
+# minizip-ng
+message(STATUS "[Deps] Checking minizip-ng...")
 find_package(minizip-ng QUIET)
 
-if(TARGET MINIZIP::minizip-ng)
+if(NOT minizip-ng_FOUND)
+    message(STATUS "[Deps] minizip-ng NOT FOUND, fetching from GitHub...")
+    
+    FetchContent_Declare(
+        minizip-ng
+        GIT_REPOSITORY "https://github.com/zlib-ng/minizip-ng.git"
+        GIT_TAG "4.0.7"
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+    )
+    
+    FetchContent_MakeAvailable(minizip-ng)
+    message(STATUS "[Deps] minizip-ng fetched and built")
+else()
+    message(STATUS "[Deps] minizip-ng found system-wide: ${minizip-ng_DIR}")
+endif()
+
+if(TARGET minizip-ng::minizip-ng)
+    set(MINIZIP_TARGET minizip-ng::minizip-ng)
+elseif(TARGET minizip-ng::minizip)
+    set(MINIZIP_TARGET minizip-ng::minizip)
+elseif(TARGET MINIZIP::minizip-ng)
     set(MINIZIP_TARGET MINIZIP::minizip-ng)
 elseif(TARGET MINIZIP::minizip)
     set(MINIZIP_TARGET MINIZIP::minizip)
 elseif(TARGET minizip)
     set(MINIZIP_TARGET minizip)
 else()
-    message("NOT FOUND target minizip-ng")
+    message(FATAL_ERROR "[Deps] minizip-ng target not found. Available targets: ${minizip-ng_TARGETS}")
 endif()
-message("minizip target is ${MINIZIP_TARGET}")
 
-find_or_fetch(nlohmann_json nlohmann_json::nlohmann_json
-    "https://github.com/nlohmann/json.git"
-    "3.12.0"
-)
-
-find_package(OpenSSL REQUIRED)
-find_package(CURL REQUIRED)
+message(STATUS "[Deps] minizip target is ${MINIZIP_TARGET}")

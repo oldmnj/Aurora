@@ -13,7 +13,7 @@ build-*/
 .xmake/
 compile_commands.json
 packages/
-.xmake/packages/
+a.xmake/packages/
 
 .vscode/
 .clangd
@@ -42,3 +42,6 @@ htmlcov/
 bin/
 lib/
 output/
+release/
+debug/
+*.bak
