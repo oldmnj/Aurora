@@ -3,8 +3,21 @@ include(FetchContent)
 set(FETCHCONTENT_BASE_DIR ${PROJECT_SOURCE_DIR}/dep)
 set(FETCHCONTENT_QUIET OFF)
 
+if(DEFINED VCPKG_TARGET_TRIPLET OR DEFINED VCPKG_INSTALLED_DIR)
+    set(VCPKG_ENABLED ON)
+    message(STATUS "[Deps] vcpkg environment detected")
+else()
+    set(VCPKG_ENABLED OFF)
+    message(STATUS "[Deps] vcpkg not detected, fallback to system/FetchContent")
+endif()
+
 macro(find_or_fetch packageName targetName gitRepo gitTag)
     string(TOLOWER ${packageName} _lc_name)
+
+    if(VCPKG_ENABLED)
+        find_package(${packageName} CONFIG REQUIRED)
+        message(STATUS "[Deps] ${packageName} via vcpkg ✓")
+    endif()
 
     find_package(${packageName} CONFIG QUIET)
 

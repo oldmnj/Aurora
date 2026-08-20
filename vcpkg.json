@@ -1,0 +1,66 @@
+{
+  "name": "AuroraLauncherCore",
+  "version": "0.1.0",
+  "dependencies": [
+    {
+      "name": "fmt",
+      "version>=": "11.2.0"
+    },
+    {
+      "name": "spdlog",
+      "version>=": "1.17.0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.12.0"
+    },
+    {
+      "name": "quickjs-ng",
+      "version>=": "0.16.1"
+    },
+    {
+      "name": "openssl",
+      "version>=": "3.6.3"
+    },
+    {
+      "name": "curl",
+      "version>=": "8.21.0"
+    },
+    {
+      "name": "minizip-ng",
+      "version>=": "4.0.7"
+    }
+  ],
+  "overrides": [
+    {
+      "name": "fmt",
+      "version": "11.2.0"
+    },
+    {
+      "name": "spdlog",
+      "version": "1.17.0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version": "3.12.0"
+    },
+    {
+      "name": "quickjs-ng",
+      "version": "0.16.1"
+    },
+    {
+      "name": "openssl",
+      "version": "3.6.3"
+    },
+    {
+      "name": "curl",
+      "version": "8.21.0"
+    },
+    {
+      "name": "minizip-ng",
+      "version": "4.0.7"
+    }
+  ],
+  "builtin-baseline": "45f9f39362a4c52e2b1fbe57b7e649db7f3d96d4"
+}
+
