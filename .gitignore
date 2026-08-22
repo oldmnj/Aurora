@@ -14,6 +14,7 @@ build-*/
 compile_commands.json
 packages/
 a.xmake/packages/
+vcpkg_installed/
 
 .vscode/
 .clangd

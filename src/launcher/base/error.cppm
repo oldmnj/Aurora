@@ -667,7 +667,7 @@ class Result<void, E> {
     template <typename F>
     constexpr const Result &IfError(F &&f) const & {
         if (!has_value_) {
-            std::forward<F>(f)(std::get<1>(storage_.error));
+            std::forward<F>(f)(std::get<1>(storage_));
         }
         return *this;
     }

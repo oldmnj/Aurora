@@ -1,6 +1,9 @@
 {
   "name": "AuroraLauncherCore",
   "version": "0.1.0",
+  "description": "A Minecraft Launcher Core",
+  "homepage": "https://github.com/oldmnj/Aurora",
+  "license": "MIT",
   "dependencies": [
     {
       "name": "fmt",
