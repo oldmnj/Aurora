@@ -10,8 +10,10 @@ For license details, see the LICENSE file in the root directory.
 */
 module;
 
-
+#include <atomic>
+#include <chrono>
 #include <fmt/format.h>
+#include <mutex>
 #include <spdlog/spdlog.h>
 #include <utility>
 
@@ -20,10 +22,48 @@ import launcher.base;
 
 namespace launcher {
 
+export struct LogField {
+    String key;
+    String value;
+    bool sensitive = false;
+};
+
+export struct LogRecord {
+    std::chrono::system_clock::time_point timestamp;
+    LogLevel level;
+    String module;
+    String message;
+    Vector<LogField> fields;
+    bool sensitive = false;
+    String thread_name;
+    u64 sequence;
+};
+
+export class LoggerImpl {
+  private:
+    Vector<SharedPtr<spdlog::sinks::sink>> sinks_;
+    LoggerConfig config_;
+    std::atomic<LogLevel> level_{LogLevel::Info};
+    std::atomic<u32> level_version_{0};
+    Vector<ModuleLogRule> module_levels_;
+
+    struct Buffer {
+        LogRecord *items;
+        u32 count, capacity;
+    };
+
+    std::mutex active_mu_;
+
+    Buffer active_, ready_, flush_;
+
+    std::atomic<u64> dropped_count_{0};
+
+    details::RecentLogRing ring_;
+};
+
 export class Logger {
   private:
-    Logger()  = default;
-    ~Logger() = default;
+    SharedPtr<LoggerImpl> impl_;
 
   public:
     static Result<void> Initialize(const LoggerConfig &config);

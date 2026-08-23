@@ -56,6 +56,16 @@ export struct MirrorRule {
     String to;
 };
 
+export struct ThirdPartyServer {
+    String name;
+    String yggdrasil_base_url;
+};
+
+u32 DefaultWorkerThreads() {
+    u32 hw = std::thread::hardware_concurrency();
+    return std::min(std::max(hw, 4u), 8u);
+}
+
 /**
  * @brief 与日志有关的配置
  */
@@ -101,14 +111,59 @@ export struct NetworkConfig {
     bool allow_insecure_download         = true;
 };
 
+export struct AuthConfig {
+    String default_service = "offline";  // offline / microsoft / <皮肤站名>
+    String client_id;  // 微软 OAuth ClientID（空则不启用微软登录）
+    String redirect_uri     = "http://127.0.0.1:0";  // 0 = 随机端口
+    bool enable_device_code = true;                  // 设备码回退开关
+    std::chrono::seconds device_code_poll_interval = std::chrono::seconds{5};
+    u32 device_code_max_polls                      = 120;  // 10 分钟上限
+    bool persist_flow       = false;   // auth_flow.json 持久化
+    bool auto_refresh       = true;    // 启动时自动刷新过期令牌
+    String token_encryption = "auto";  // auto/os_keychain/derived
+    Vector<ThirdPartyServer>
+            third_party_servers;  // 皮肤站（yggdrasil，12.2/32.5）
+};
+
+
 /**
  * @brief 运行时相关都配置
  */
 export struct RuntimeConfig {
-    u32 worker_threads =
-            std::max(4u, std::thread::hardware_concurrency());  // 下载线程数
-    bool debug_mode   = false;  // Logger: Debug & Trace
-    bool enable_cache = true;   // 是否缓存下载
+    // 线程/运行调优（13 章、27.21、附录 H）
+    u32 worker_threads          = DefaultWorkerThreads();  // min(max(4,hw),8)
+    bool debug_mode             = false;
+    bool enable_cache           = true;
+    u32 download_concurrency    = 8;
+    bool low_memory_mode        = false;  // 低内存模式：Xmx 上限 2G + 降并发
+    u32 max_concurrent_launches = 1;      // 并发启动上限
+    String java_path;                     // 空 → 自动探测
+    String java_args  = "-Xmx2G";
+    u32 min_memory_mb = 1024;
+    u32 max_memory_mb = 2048;
+    Path game_dir;  // 空 → 默认 .minecraft 风格目录
+    bool keep_jvm_args           = true;
+    bool auto_download_jre       = false;
+    String jre_mirror            = "";  // 空 = 官方
+    u32 window_width             = 854;
+    u32 window_height            = 480;
+    bool fullscreen              = false;
+    String server_address        = "";  // 进服地址（host[:port]）
+    bool export_official_profile = false;
+    bool multi_instance          = false;
+    bool online_mode             = true;  // 会话 join
+};
+
+export struct PluginConfig {
+    bool enabled     = true;
+    Path plugins_dir = "plugins";
+    Vector<String> disabled_plugins;             // 按 id 禁用
+    bool allow_network                  = true;  // JS 插件网络权限
+    bool allow_launch                   = true;
+    bool allow_fs                       = false;
+    u32 quickjs_heap_limit_mb           = 128;
+    std::chrono::seconds plugin_timeout = std::chrono::seconds{30};
+    bool sandbox_strict = true;  // 严格沙箱（禁 eval/new Function）
 };
 
 /**
