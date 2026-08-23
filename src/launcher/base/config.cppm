@@ -46,25 +46,59 @@ export struct PathConfig {
             "./runtime";  // SDK 工作目录，任何相对路径都要基于此处而言
 };
 
+export struct ModuleLogLevel {
+    String module;
+    LogLevel level;
+};
+
+export struct MirrorRule {
+    String from;
+    String to;
+};
+
 /**
  * @brief 与日志有关的配置
  */
 export struct LoggerConfig {
-    LogLevel level         = LogLevel::Info;
-    bool flush_immediately = false;  // 每条日志立即Flush
-    bool console_output    = true;   // 是否终端打印
-    bool file_output       = true;   // 是否输出文件
-    Path file_name         = "launcher.log";
-    bool is_async          = false;
+    LogLevel level = LogLevel::Info;
+    String pattern = "[%Y-%m-%d %H:%M:$S.%e] [%l] [%n] %v";
+    Path log_dir;  ///< 空: 默认logs/
+    String file_name       = "launcher.log";
+    u64 max_file_size      = 16'777'216;  ///< 16*1024*1024
+    u32 max_file_count     = 5;
+    bool is_async          = true;
+    bool flush_immediately = false;
+    Vector<ModuleLogLevel> module_levels;
+    u32 recent_capacity = 4096;
+};
+
+export struct DownloadConfig {
+    u32 max_concurrent                   = 8;
+    u32 per_host_limit                   = 4;
+    u32 retry_count                      = 3;
+    std::chrono::seconds timeout         = std::chrono::seconds{30};
+    std::chrono::seconds connect_timeout = std::chrono::seconds{10};
+    bool resume                          = true;
+    String user_agent                    = "AuroraLauncher/0.2.0";
+    Vector<MirrorRule> mirrors;
+    bool verify_checksum     = true;
+    bool keep_part_on_cancel = false;
+    Path temp_dir;
+    u64 max_partial_bytes = 0;
 };
 
 /**
  * @brief 与网络相关的配置
  */
 export struct NetworkConfig {
-    std::chrono::seconds timeout = std::chrono::seconds{30};
-    u32 retry_count              = 3;
-    bool verify_ssl              = true;
+    String proxy;
+    std::chrono::seconds timeout         = std::chrono::seconds{30};
+    std::chrono::seconds connect_timeout = std::chrono::seconds{10};
+    u32 max_connections                  = 32;
+    bool verify_tls                      = true;
+    std::chrono::seconds dns_timeout     = std::chrono::seconds{5};
+    bool retry_on_5xx                    = true;
+    bool allow_insecure_download         = true;
 };
 
 /**
