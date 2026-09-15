@@ -20,6 +20,8 @@ module;
 export module launcher.base:config;
 import :types;
 import :error;
+import :result;
+
 
 // Config
 namespace launcher {

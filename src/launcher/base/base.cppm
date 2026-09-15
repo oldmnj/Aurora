@@ -10,6 +10,7 @@ module;
 export module launcher.base;
 export import :types;
 export import :error;
+export import :result;
 export import :platform;
 export import :build;
 export import :config;

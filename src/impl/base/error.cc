@@ -1,5 +1,6 @@
 module;
 
+#include <fmt/format.h>
 #include <source_location>
 #include <string>
 
@@ -7,7 +8,7 @@ module launcher.base;
 
 namespace launcher {
 Error::Error(
-        ErrorCategory category, ErrorCode code, StringView message,
+        ErrorCategory category, ErrorCode code, String message,
         std::source_location location
 )
     : code_(code),
@@ -84,6 +85,18 @@ constexpr StringView Error::ToString(ErrorCode code) noexcept {
     default:
         return "Unknown";
     }
+}
+
+template <typename... Args>
+[[nodiscard]]
+Error Error::Format(
+        ErrorCategory category, ErrorCode code, fmt::format_string<Args...> fmt,
+        Args &&...args, std::source_location location
+) {
+    return Error{
+            category, code,
+            std::move(fmt::format(fmt, std::forward<Args>(args)...)), location
+    };
 }
 
 [[nodiscard]]
