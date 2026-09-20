@@ -48,7 +48,7 @@ export struct PathConfig {
             "./runtime";  // SDK 工作目录，任何相对路径都要基于此处而言
 };
 
-export struct ModuleLogLevel {
+export struct ModuleLogRule {
     String module;
     LogLevel level;
 };
@@ -80,7 +80,7 @@ export struct LoggerConfig {
     u32 max_file_count     = 5;
     bool is_async          = true;
     bool flush_immediately = false;
-    Vector<ModuleLogLevel> module_levels;
+    Vector<ModuleLogRule> module_levels;
     u32 recent_capacity = 4096;
 };
 

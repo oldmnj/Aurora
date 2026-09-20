@@ -14,12 +14,7 @@
 module;
 
 #include <fmt/format.h>
-#include <memory>
-#include <new>
 #include <source_location>
-#include <type_traits>
-#include <utility>
-#include <variant>
 
 export module launcher.base:error;
 import :types;
@@ -70,20 +65,10 @@ export class Error {
            fmt::format_string<Args...> fmt, Args &&...args,
            std::source_location location = std::source_location::current());
 
-    /*
+
     Error(ErrorCategory category, ErrorCode code, String message,
-          UniquePtr<Error> cause,
+          SharedPtr<const Error> cause,
           std::source_location location = std::source_location::current());
-
-    template <typename... Args>
-    [[nodiscard]]
-    static Error
-    Format(ErrorCategory category, ErrorCode code,
-           fmt::format_string<Args...> fmt, Args &&...args,
-           UniquePtr<Error> cause,
-           std::source_location location = std::source_location::current());
-
-    */
 
     [[nodiscard]] ErrorCode Code() const noexcept;
     [[nodiscard]]
@@ -103,16 +88,29 @@ export class Error {
     [[nodiscard]]
     ErrorCategory Category() const noexcept;
 
+    auto WithCause(Error cause) -> Error;
+
+    auto rWithCause(Error cause) && -> Error;
+
+    [[nodiscard]]
+    auto HasCause() const -> bool;
+
+    [[nodiscard]]
+    auto Cause() const -> const Error *;
+
+    [[nodiscard]]
+    auto ChainDepth() const -> usize;
+
   private:
     ErrorCode code_;
     ErrorCategory category_;
     String message_;
     std::source_location location_;
-    SharedPtr<Error> cause_;
+    SharedPtr<const Error> cause_;
 };
 
 /*
- 
+
 
 // Ok - 成功值
 export template <typename T = void, typename E = Error>

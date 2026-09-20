@@ -1,8 +1,13 @@
+#include <fmt/base.h>
 module;
 
+#include <algorithm>
 #include <fmt/format.h>
+#include <iterator>
+#include <memory>
 #include <source_location>
 #include <string>
+#include <utility>
 
 module launcher.base;
 
@@ -15,6 +20,17 @@ Error::Error(
       category_(category),
       message_(message),
       location_(location) {}
+
+Error::Error(
+        ErrorCategory category, ErrorCode code, String message,
+        SharedPtr<const Error> cause, std::source_location location
+)
+    : code_(code),
+      category_(category),
+      message_(message),
+      location_(location),
+      cause_(cause) {}
+
 
 [[nodiscard]] ErrorCode Error::Code() const noexcept { return this->code_; }
 
@@ -125,30 +141,83 @@ constexpr StringView Error::ToString(ErrorCategory category) noexcept {
 
 [[nodiscard]]
 String Error::ToString() const {
-    StringView filename = location_.file_name();
-    if (auto pos = filename.rfind('/'); pos != StringView::npos) {
-        filename.remove_prefix(pos + 1);
-    }
-#ifdef _WIN32
-    if (auto pos = filename.rfind('\\'); pos != std::string_view::npos) {
-        filename.remove_prefix(pos + 1);
-    }
-#endif
+    String out_str;
+    out_str.reserve(
+            (128 * (ChainDepth() > 8 ? 9 : (ChainDepth() + 1))) +
+            ((ChainDepth() > 8) ? 72 : 0)
+    );
 
-    String result;
-    result.reserve(128);
-    result.append("[")
-            .append(ToString(category_))
-            .append("] ")
-            .append(ToString(code_))
-            .append(" message: ")
-            .append(message_)
-            .append(", at ")
-            .append(filename)
-            .append(":")
-            .append(std::to_string(location_.line()));
+    auto it = std::back_inserter(out_str);
 
-    return String(result);
+    fmt::format_to(
+            it, "Error[{}:{}] {}", ToString(category_), ToString(code_),
+            message_
+    );
+    if (location_.file_name() != nullptr && location_.line() != 0) {
+        fmt::format_to(
+                it, "\n  at {}:{}", location_.file_name(), location_.line()
+        );
+    }
+
+    if (this->HasCause()) {
+        constexpr usize kMaxChainDepth = 8;
+        usize depth                    = 0;
+        const Error *cur               = cause_.get();
+
+        while (cur != nullptr) {
+            if (depth >= kMaxChainDepth) {
+                fmt::format_to(
+                        it,
+                        "\n  ...(Chain is too long(ChainDepth[{}] > 8), has "
+                        "been truncated)",
+                        ChainDepth()
+                );
+                break;
+            }
+
+            fmt::format_to(
+                    it, "\n  caused by: Error[{}:{}] {}",
+                    ToString(cur->category_), ToString(cur->code_),
+                    cur->message_
+            );
+            if (cur->location_.file_name() != nullptr &&
+                cur->location_.line() != 0) {
+                fmt::format_to(
+                        it, "\n    at {}:{}", cur->location_.file_name(),
+                        cur->location_.line()
+                );
+            }
+            cur = cur->cause_.get();
+            ++depth;
+        }
+    }
+}
+
+auto Error::WithCause(Error cause) -> Error {
+    return Error{
+            this->category_, this->code_, this->message_,
+            std::make_shared<const Error>(std::move(cause)), this->location_
+    };
+}
+
+auto Error::rWithCause(Error cause) && -> Error {
+    Error out_err{std::move(*this)};
+    out_err.cause_ = std::make_shared<const Error>(std::move(cause));
+    return out_err;
+}
+
+auto Error::HasCause() const -> bool { return this->cause_ != nullptr; }
+
+auto Error::Cause() const -> const Error * { return cause_.get(); }
+
+auto Error::ChainDepth() const -> usize {
+    usize depth      = 0;
+    const Error *cur = cause_.get();
+    while (cur != nullptr) {
+        ++depth;
+        cur = cur->cause_.get();
+    }
+    return depth;
 }
 
 }  // namespace launcher
