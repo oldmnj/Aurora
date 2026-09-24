@@ -7,7 +7,6 @@
 module;
 
 #include <chrono>
-#include <nlohmann/json.hpp>
 
 module launcher.base;
 
@@ -24,17 +23,17 @@ Result<void> Config::Validate() const {
     */) {
         return Err(
                 {ErrorCategory::Config, ErrorCode::InvalidArgument,
-                 "路径参数无效"}
+                 "arg of path is invalid"}
         );
     } else if (this->network.timeout <= std::chrono::seconds{0}) {
         return Err(
                 {ErrorCategory::Config, ErrorCode::InvalidArgument,
-                 "超时参数不是正数"}
+                 "the timeout must > 0"}
         );
     } else if (this->runtime.worker_threads <= 0) {
         return Err(
                 {ErrorCategory::Config, ErrorCode::InvalidArgument,
-                 "runtime: 线程数不能为非正整数"}
+                 "runtime: the worker_threads cannot be '0'"}
         );
     } else {
         return {};

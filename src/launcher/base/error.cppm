@@ -22,22 +22,72 @@ import :types;
 namespace launcher {
 
 export enum class ErrorCode {
+    // 基础状态
     Ok,
+    Unknown,
+    Cancelled,
+    InternalError,
+
+    // 参数与状态校验
     InvalidArgument,
     InvalidState,
     Unsupported,
+
+    // IO 与文件系统
     IOError,
     FileNotFound,
+    FileTooLarge,
+    FileAlreadyExists,
+    DiskFull,
     PermissionDenied,
+
+    // 网络
     NetworkError,
     Timeout,
     ConnectionFailed,
+    ConnectionReset,
+    RateLimited,
+
+    // 解析与数据
     ParseError,
     InvalidFormat,
     DownloadFailed,
     ChecksumMismatch,
-    InternalError,
-    Unknown
+    JsonError,
+    DataCorrupted,
+
+    // JVM 与进程
+    JvmNotFound,
+    JvmIncompatible,
+    ProcessCreateFailed,
+    ProcessLaunchFailed,
+    ProcessCrashed,
+    OutOfMemory,
+
+    // 版本与依赖
+    VersionNotFound,
+    VersionResolveFailed,
+    AssetMissing,
+    DependencyMissing,
+    DependencyConflict,
+
+    // 认证与安全
+    AuthFailed,
+    AuthExpired,
+    TokenInvalid,
+
+    // 插件与脚本
+    PluginLoadFailed,
+    PluginError,
+    PluginDisabled,
+    ScriptError,
+    ScriptTimeout,
+
+    // 配置与热重载
+    ConfigLoadFailed,
+    ConfigWatchFailed,
+    ConfigParseError,
+    HotReloadFailed
 };
 
 export enum class ErrorCategory {
@@ -49,9 +99,11 @@ export enum class ErrorCategory {
     Security,
     Config,
     Runtime,
-    Minecraft
+    Minecraft,
+    Auth,
+    Plugin,
+    Script
 };
-
 
 export class Error {
   public:
@@ -90,7 +142,8 @@ export class Error {
 
     auto WithCause(Error cause) -> Error;
 
-    auto rWithCause(Error cause) && -> Error;
+    // 注意，仅在你不会使用原对象时使用此函数
+    auto rWithCause(Error &&cause) -> Error;
 
     [[nodiscard]]
     auto HasCause() const -> bool;

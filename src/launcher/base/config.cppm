@@ -82,6 +82,8 @@ export struct LoggerConfig {
     bool flush_immediately = false;
     Vector<ModuleLogRule> module_levels;
     u32 recent_capacity = 4096;
+    bool json           = true;
+    bool console        = true;
 };
 
 export struct DownloadConfig {

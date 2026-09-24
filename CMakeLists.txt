@@ -25,6 +25,7 @@ include(cmake/Settings.cmake)
 include(cmake/DepPackage.cmake)
 include(cmake/BuildOption.cmake)
 
+
 add_subdirectory(src)
 add_subdirectory(src/cli)
 add_subdirectory(tests)

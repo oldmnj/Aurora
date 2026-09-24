@@ -1,8 +1,17 @@
-add_executable(LoggerTest ${PROJECT_SOURCE_DIR}/tests/test_logger/main.cc)
-target_link_libraries(LoggerTest
+include(GoogleTest)
+
+add_executable(logger_tests)
+
+target_link_libraries(logger_tests
     PRIVATE
         AuroraCore
-        fmt::fmt
-        spdlog::spdlog
+        GTest::gmock_main
+        ${DEPS_MODULE_CORE}
 )
 
+target_sources(logger_tests
+    PRIVATE
+        test_logger/main.cc
+)
+
+gtest_discover_tests(logger_tests)

@@ -14,15 +14,15 @@ endif()
 macro(find_or_fetch packageName targetName gitRepo gitTag)
     string(TOLOWER ${packageName} _lc_name)
 
-    if(VCPKG_ENABLED)
-        find_package(${packageName} CONFIG REQUIRED)
-        message(STATUS "[Deps] ${packageName} via vcpkg ✓")
-    endif()
-
     find_package(${packageName} CONFIG QUIET)
 
     if(NOT ${packageName}_FOUND)
         find_package(${packageName} QUIET)
+    endif()
+
+    if(VCPKG_ENABLED)
+        find_package(${packageName} CONFIG REQUIRED)
+        message(STATUS "[Deps] ${packageNa} via vcpkg ✓")
     endif()
 
     if(NOT ${packageName}_FOUND)
@@ -128,3 +128,14 @@ else()
 endif()
 
 message(STATUS "[Deps] minizip target is ${MINIZIP_TARGET}")
+
+# ====== GTEST ======
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+find_or_fetch(GTest GTest::gtest_main
+    "https://github.com/google/googletest.git"
+    "v1.18.0"
+)
+
+if(NOT TARGET GTest::gtest_main)
+    message(FATAL_ERROR "[Deps] GTest::gtest_main not found")
+endif()

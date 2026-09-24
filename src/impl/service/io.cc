@@ -117,10 +117,10 @@ auto IO::WriteFile(Path path, ConstByteSpan data) -> Result<void> {
 auto IO::WriteFileAtomic(Path path, ConstByteSpan data) -> Result<void> {
     auto uuid_result = UUIDGenerator::V4();
     if (uuid_result.HasError()) {
-        return Err<void>(
-                {ErrorCategory::IO, ErrorCode::IOError,
-                 uuid_result.Error().Message()}
-        );
+        return Err<void>(Error{
+                ErrorCategory::IO, ErrorCode::IOError, "Failed to generate UUID"
+        }
+                                 .rWithCause(std::move(uuid_result.Error())));
     }
     auto tmp = path.string() + ".tmp." + uuid_result.Value().ToString();
 
@@ -153,7 +153,7 @@ auto IO::FileSize(Path path) -> Result<u64> {
                      "File is too big"}
             );
         }
-        return static_cast<u64>(file_size);
+        return Ok(static_cast<u64>(file_size));
     } catch (std::filesystem::filesystem_error &e) {
         return Err<u64>(
                 {ErrorCategory::IO, ErrorCode::IOError,
@@ -204,7 +204,7 @@ auto IO::ReadText(Path path) -> Result<String> {
             );
         }
 
-        return ss.str();
+        return Ok(ss.str());
     } catch (std::filesystem::filesystem_error &e) {
         if (e.code() == std::errc::permission_denied) {
             return Err<String>(
